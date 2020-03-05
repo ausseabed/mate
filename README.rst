@@ -61,3 +61,38 @@ Testing
 Unit tests can be run as follows::
 
     python -m pytest --cov=hyo2.mate --cov-report=html  tests/
+
+
+Test Data
+---------
+
+A collection of data has been uploaded to an AWS S3 bucket to support testing and development of the Mate application. This data requires AWS credentials to download (contact development team).
+
+Once AWS access credentials have been obtained the test data can be downloaded using the `AWS CLI <https://aws.amazon.com/cli/>`_.
+
+**Note:** This data is approximately 20Gb in size
+
+Windows instructions
+********************
+
+Set environment variables for AWS::
+
+    set AWS_ACCESS_KEY_ID=<AWS Access Key Id>
+    set AWS_SECRET_ACCESS_KEY=<AWS Access Key Secret>
+
+Download data from S3 into current folder::
+
+    aws s3 sync s3://ausseabed-test-data/ .
+
+
+Linux, MacOS instructions
+*************************
+
+Set environment variables for AWS::
+
+    export AWS_ACCESS_KEY_ID=<AWS Access Key Id>
+    export AWS_SECRET_ACCESS_KEY=<AWS Access Key Secret>
+
+Download data from S3 into current folder::
+
+    aws s3 sync s3://ausseabed-test-data/ .
