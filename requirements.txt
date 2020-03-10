@@ -1,0 +1,7 @@
+appdirs
+coveralls
+jsonschema
+psutil
+pyproj
+pytest
+pytest-cov

@@ -23,24 +23,32 @@ Mate
 Installation
 ------------
 
-Install unit test dependencies::
+**Note:** Mate requires Python v3.6+, the following commands are written assuming
+:bash:`pip` has been setup as an alias to a Python 3 based installation. If this is not the case please use :bash:`pip3` in place of :bash:`pip` below.
 
-    pip install pytest pytest-cov
+Clone source code::
 
-Install QAX dependencies (QA JSON parsing and validation)::
+    git clone https://github.com/ausseabed/hyo2_mate.git
 
-    pip install jsonschema
-    pip install appdirs
+Install QAX dependencies::
+
+    pip install -r requirements.txt
     pip install --no-deps -e git+https://github.com/hydroffice/hyo2_abc#egg=hyo2.abc
-    pip install --no-deps -e git+https://github.com/hydroffice/hyo2_qax#egg=hyo2.qax
+    pip install --no-deps -e git+https://github.com/ausseabed/hyo2_qax#egg=hyo2.qax
+
+Install application::
+
+    cd hyo2_mate
+    pip install --no-deps -e .
+
 
 Command Line Application
 ------------------------
 Mate includes a simple command line application. Usage can be displayed as follows::
 
-    %> python hyo2/mate/app/cli.py -h
+    %> hyo2.mate -h
 
-    usage: cli.py [-h] -i INPUT [-o OUTPUT]
+    usage: hyo2.mate [-h] -i INPUT [-o OUTPUT]
 
     optional arguments:
       -h, --help            show this help message and exit
@@ -52,7 +60,7 @@ Mate includes a simple command line application. Usage can be displayed as follo
 
 An example command line is shown below::
 
-    python hyo2/mate/app/cli.py --input tests/test_data/input.json --output tests/test_data/test_out.json
+    hyo2.mate --input tests/test_data/input.json --output tests/test_data/test_out.json
 
 
 Testing
