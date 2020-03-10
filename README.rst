@@ -32,7 +32,7 @@ Clone source code::
 
 Install QAX dependencies::
 
-    pip install -r requirements.txt
+    pip install -r ./hyo2_mate/requirements.txt
     pip install --no-deps -e git+https://github.com/hydroffice/hyo2_abc#egg=hyo2.abc
     pip install --no-deps -e git+https://github.com/ausseabed/hyo2_qax#egg=hyo2.qax
 
