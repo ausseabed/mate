@@ -162,6 +162,22 @@ class ScanALL(Scan):
             self.reader.seek(_curr + num_bytes, 0)
         return
 
+    def get_installation_parameters(self):
+        '''
+        Gets the decoded contents of the I datagram (installation parameters)
+        as a Python dict.
+        Will return None if datagram not present in *.all file
+        '''
+        dgi = self.get_datagram_info('I')
+        if dgi is None:
+            return None
+        try:
+            inst_params = dgi['other']
+        except KeyError as e:
+            # installation params were not included in dict as expected
+            return None
+        return inst_params
+
     def get_datagram_format_version(self):
         '''
         gets the version of the datagram format used by this file

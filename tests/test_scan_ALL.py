@@ -66,6 +66,10 @@ class TestMateScanALL(unittest.TestCase):
         self.assertEqual(self.test.PU_status(),
                          scan.A_PASS)
 
+    def test_get_installation_parameters(self):
+        inst_params = self.test.get_installation_parameters()
+        self.assertIsInstance(inst_params, dict)
+
 
 def suite():
     s = unittest.TestSuite()
