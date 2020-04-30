@@ -1,6 +1,10 @@
 Mate
 ====
 
+.. image:: https://circleci.com/gh/ausseabed/hyo2_mate.svg?style=svg
+    :target: https://circleci.com/gh/ausseabed/hyo2_mate
+    :alt: CircleCI Status
+
 .. image:: https://ci.appveyor.com/api/projects/status/f3c5h68iipt2c5xd?svg=true
     :target: https://ci.appveyor.com/project/giumas/hyo2-mate
     :alt: AppVeyor Status
