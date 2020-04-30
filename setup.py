@@ -49,17 +49,14 @@ setup(
     setup_requires=[
         "setuptools",
         "wheel",
+        "pytest",
     ],
-    # # the hyo2.abc package is required, however including it here means that
-    # # the dependencies for abc must also be installed (these aren't required
-    # # by qax)
-    # install_requires=[
-    #     "hyo2.abc",
-    # ],
+    install_requires=[
+        "ausseabed.qajson",
+    ],
     python_requires='>=3.6',
     entry_points={
         "gui_scripts": [
-            # 'mate = hyo2.mate.gui:gui',
         ],
         "console_scripts": [
             'hyo2.mate=hyo2.mate.app.cli:main',

@@ -35,17 +35,13 @@ install:
   # Check that we have the expected version of Python
   - python --version
 
-  - pip install pytest pytest-cov
+  - pip install -r requirements.txt
   - pip install coveralls
   # for hyo2.abc
-  - conda install numpy matplotlib-base pyproj appdirs bidict coverage psutil
+  - conda install coverage
   # for hyo2.soundspeed
   - conda install cython
-  # --no-deps because of pip not detecting the installed GDAL
-  - pip install jsonschema
-  - pip install appdirs
-  - pip install --no-deps https://github.com/hydroffice/hyo2_abc/archive/master.zip
-  - pip install --no-deps https://github.com/ausseabed/hyo2_qax/archive/master.zip
+
 
 build: off
 build_script:

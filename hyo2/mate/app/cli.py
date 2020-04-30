@@ -3,7 +3,7 @@ import json
 import os
 
 from hyo2.mate.lib.check_runner import CheckRunner
-from hyo2.qax.lib.qa_json import QAJson
+from ausseabed.qajson.parser import QajsonParser
 
 
 def main():
@@ -21,10 +21,10 @@ def main():
             "QA JSON file does not exist {}".format(qajson_input))
 
     # most recent schema
-    schema_path = QAJson.schema_paths()[0]
+    schema_path = QajsonParser.schema_paths()[0]
 
     # validate the provided QA JSON file against the JSON schema definition
-    if not QAJson.validate_qa_json(qajson_input, schema_path):
+    if not QajsonParser.validate_qa_json(qajson_input, schema_path):
         raise RuntimeError(
             "QA JSON is invalid {}".format(qajson_input))
 

@@ -4,8 +4,8 @@ import logging
 import os
 from typing import Callable
 
-from hyo2.qax.lib.qa_json import QaJsonParam, QaJsonOutputs, QaJsonExecution, \
-    QaJsonInputs
+from ausseabed.qajson.model import QajsonParam, QajsonOutputs, \
+    QajsonExecution, QajsonInputs
 
 from hyo2.mate.lib.scan_utils import get_scan, get_check, is_check_supported
 
@@ -165,9 +165,9 @@ class CheckRunner:
                 checkparams = []
                 if 'params' in checkdata['inputs']:
                     checkparams = (
-                        QaJsonInputs.from_dict(checkdata['inputs']).params)
+                        QajsonInputs.from_dict(checkdata['inputs']).params)
 
-                checkoutputs = QaJsonOutputs()
+                checkoutputs = QajsonOutputs()
                 checkstatus = None
                 checkerrormessage = None
                 checkstart = datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f")
@@ -190,6 +190,6 @@ class CheckRunner:
                 if checkerrormessage is not None:
                     execution['error'] = checkerrormessage
 
-                checkoutputs.execution = QaJsonExecution.from_dict(execution)
+                checkoutputs.execution = QajsonExecution.from_dict(execution)
 
                 self._add_output(checkid, filename, checkoutputs)

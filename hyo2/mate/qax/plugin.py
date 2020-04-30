@@ -5,8 +5,8 @@ from hyo2.mate.lib.scan_utils import all_checks
 from hyo2.mate.lib.check_runner import CheckRunner
 from hyo2.qax.lib.plugin import QaxCheckToolPlugin, QaxCheckReference, \
     QaxFileType
-from hyo2.qax.lib.qa_json import QaJsonRoot, QaJsonDataLevel, QaJsonCheck, \
-    QaJsonFile, QaJsonInputs
+from ausseabed.qajson.model import QajsonRoot, QajsonDataLevel, QajsonCheck, \
+    QajsonFile, QajsonInputs
 
 
 class MateQaxPlugin(QaxCheckToolPlugin):
@@ -54,7 +54,7 @@ class MateQaxPlugin(QaxCheckToolPlugin):
     def checks(self) -> List[QaxCheckReference]:
         return self._check_references
 
-    def __check_files_match(self, a: QaJsonInputs, b: QaJsonInputs) -> bool:
+    def __check_files_match(self, a: QajsonInputs, b: QajsonInputs) -> bool:
         """ Checks if the input files in a are the same as b. This is used
         to match the plugin's output with the QAJSON outputs that must be
         updated with the check results.
@@ -65,7 +65,7 @@ class MateQaxPlugin(QaxCheckToolPlugin):
 
     def run(
             self,
-            qajson: QaJsonRoot,
+            qajson: QajsonRoot,
             progress_callback: Callable = None
             ) -> NoReturn:
         self.stopped = False
@@ -88,7 +88,7 @@ class MateQaxPlugin(QaxCheckToolPlugin):
         # the checks runner produces an array containing a listof checks
         # each check being a dictionary. Deserialise these using the qa json
         # datalevel class
-        out_dl = QaJsonDataLevel.from_dict(
+        out_dl = QajsonDataLevel.from_dict(
             {'checks': self.check_runner.output})
 
         # now loop through all raw_data (Mate only does raw data) checks in
@@ -126,7 +126,7 @@ class MateQaxPlugin(QaxCheckToolPlugin):
             self.check_runner.stop()
 
     def update_qa_json_input_files(
-            self, qa_json: QaJsonRoot, files: List[Path]) -> NoReturn:
+            self, qa_json: QajsonRoot, files: List[Path]) -> NoReturn:
         """ Updates qa_json to support the list of provided files. function
         defined in base class has been overwritten to support some Mate
         specifics in the way it supports multiple files.
@@ -164,9 +164,9 @@ class MateQaxPlugin(QaxCheckToolPlugin):
                 check_ref = self.get_check_reference(mate_check.info.id)
                 if not check_ref.supports_file(input_file):
                     continue
-                mate_check_clone = QaJsonCheck.from_dict(mate_check.to_dict())
+                mate_check_clone = QajsonCheck.from_dict(mate_check.to_dict())
                 inputs = mate_check_clone.get_or_add_inputs()
                 inputs.files.append(
-                    QaJsonFile(path=str(input_file), description=None))
+                    QajsonFile(path=str(input_file), description=None))
                 # ** ASSUME ** mate checks only go in the raw_data data level
                 qa_json.qa.raw_data.checks.append(mate_check_clone)

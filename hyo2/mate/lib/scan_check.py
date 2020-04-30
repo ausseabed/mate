@@ -2,7 +2,7 @@ from typing import List
 
 from hyo2.mate.lib.scan import Scan
 from hyo2.mate.lib.scan import A_NONE, A_PARTIAL, A_FULL, A_FAIL, A_PASS
-from hyo2.qax.lib.qa_json import QaJsonParam, QaJsonOutputs
+from ausseabed.qajson.model import QajsonParam, QajsonOutputs
 
 
 class ScanCheck:
@@ -10,13 +10,13 @@ class ScanCheck:
     # objects included in list will have a `name` and `value` attribute
     default_params = []
 
-    def __init__(self, scan: Scan, params: List[QaJsonParam]):
+    def __init__(self, scan: Scan, params: List[QajsonParam]):
         self.scan = scan
         self.params = params
-        self._output = None  # QaJsonOutputs
+        self._output = None  # QajsonOutputs
 
     @property
-    def output(self) -> QaJsonOutputs:
+    def output(self) -> QajsonOutputs:
         """The output of the check. Will be empty until after `run_check` has
         been called.
 
@@ -25,7 +25,7 @@ class ScanCheck:
         """
         return self._output
 
-    def get_param(self, name: str) -> QaJsonParam:
+    def get_param(self, name: str) -> QajsonParam:
         """ Gets a parameter based on the given name. Will return None if
         parameter does not exist.
         """
@@ -65,7 +65,7 @@ class FilenameChangedCheck(ScanCheck):
 
         qa_pass = "no" if filename_changed else "yes"
 
-        self._output = QaJsonOutputs(
+        self._output = QajsonOutputs(
             execution=None,
             files=None,
             count=None,
@@ -97,7 +97,7 @@ class DateChangedCheck(ScanCheck):
 
         qa_pass = "no" if date_changed else "yes"
 
-        self._output = QaJsonOutputs(
+        self._output = QajsonOutputs(
             execution=None,
             files=None,
             count=None,
@@ -135,7 +135,7 @@ class BathymetryAvailableCheck(ScanCheck):
             qa_pass = "no"
             msg = "Bathymetry available flag {} is unknown".format(bathy_avail)
 
-        self._output = QaJsonOutputs(
+        self._output = QajsonOutputs(
             execution=None,
             files=None,
             count=None,
@@ -173,7 +173,7 @@ class BackscatterAvailableCheck(ScanCheck):
             qa_pass = "no"
             msg = "Backscatter available flag {} is unknown".format(bs_avail)
 
-        self._output = QaJsonOutputs(
+        self._output = QajsonOutputs(
             execution=None,
             files=None,
             count=None,
@@ -204,7 +204,7 @@ class RayTracingCheck(ScanCheck):
 
         qa_pass = "yes" if rt_avail else "no"
 
-        self._output = QaJsonOutputs(
+        self._output = QajsonOutputs(
             execution=None,
             files=None,
             count=None,
@@ -223,7 +223,7 @@ class MinimumPingCheck(ScanCheck):
     name = "Minimum Ping count"
     version = '1'
     default_params = [
-        QaJsonParam(name='threshold', value=20)
+        QajsonParam(name='threshold', value=20)
     ]
 
     def __init__(self, scan: Scan, params):
@@ -251,7 +251,7 @@ class MinimumPingCheck(ScanCheck):
 
         qa_pass = "yes" if passed else "no"
 
-        self._output = QaJsonOutputs(
+        self._output = QajsonOutputs(
             execution=None,
             files=None,
             count=None,
@@ -282,7 +282,7 @@ class EllipsoidHeightAvailableCheck(ScanCheck):
 
         qa_pass = "yes" if eh_avail else "no"
 
-        self._output = QaJsonOutputs(
+        self._output = QajsonOutputs(
             execution=None,
             files=None,
             count=None,
@@ -318,7 +318,7 @@ class PuStatusCheck(ScanCheck):
             qa_pass = "no"
             msg = "PU Status flag {} is unknown".format(pu_status)
 
-        self._output = QaJsonOutputs(
+        self._output = QajsonOutputs(
             execution=None,
             files=None,
             count=None,

@@ -29,17 +29,15 @@ Installation
 Clone source code::
 
     git clone https://github.com/ausseabed/hyo2_mate.git
+    cd hyo2_mate
 
-Install QAX dependencies::
+Install dependencies::
 
-    pip install -r ./hyo2_mate/requirements.txt
-    pip install --no-deps -e git+https://github.com/hydroffice/hyo2_abc#egg=hyo2.abc
-    pip install --no-deps -e git+https://github.com/ausseabed/hyo2_qax#egg=hyo2.qax
+    pip install -r requirements.txt
 
 Install application::
 
-    cd hyo2_mate
-    pip install --no-deps -e .
+    pip install -e .
 
 
 Command Line Application
