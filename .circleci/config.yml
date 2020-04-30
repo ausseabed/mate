@@ -1,0 +1,20 @@
+version: 2
+jobs:
+  build:
+    working_directory: ~/build
+    docker:
+      - image: circleci/python:3.6.4
+    steps:
+      - checkout
+      - run:
+          command: |  # use pipenv to install dependencies
+            sudo pip install pipenv
+            pipenv install
+      - run:
+          command: |
+            mkdir test-results
+            pipenv run python -m pytest --junitxml=test-results/junit.xml -s --cov=hyo2.mate tests/
+      - store_test_results:
+          path: test-results
+      - store_artifacts:
+          path: test-results
