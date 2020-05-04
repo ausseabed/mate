@@ -62,10 +62,6 @@ class TestMateScanALL(unittest.TestCase):
     def test_ellipsoid_height_availability(self):
         self.assertTrue(self.test.ellipsoid_height_availability())
 
-    def test_PU_status(self):
-        self.assertEqual(self.test.PU_status(),
-                         scan.A_PASS)
-
     def test_get_installation_parameters(self):
         inst_params = self.test.get_installation_parameters()
         self.assertIsInstance(inst_params, dict)
