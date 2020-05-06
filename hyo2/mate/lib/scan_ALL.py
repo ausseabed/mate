@@ -54,10 +54,9 @@ class ScanALL(Scan):
         :param datagram: The datagram object
         '''
 
-        # get the datagram name if it exists otherwise use the character id
-        name = self.all_reader.getDatagramName(datagram_char)
-        if name is None:
-            name = datagram_char
+        # Use the datagram id character as the key to store values in the
+        # cache dict. Most users/developers are familiar with this
+        name = datagram_char
 
         # keep a list of datagrams in the datagram dict. If one hasn't been
         # added with this name yet create a new array
@@ -126,10 +125,10 @@ class ScanALL(Scan):
         parameters from the first will be included.
         Will return None if datagram not present in *.all file
         '''
-        if 'I_Installation_Start' not in self.datagrams:
+        if 'I' not in self.datagrams:
             return None
 
-        installationParametersDatagrams = self.datagrams['I_Installation_Start']
+        installationParametersDatagrams = self.datagrams['I']
         for installationParametersDatagram in installationParametersDatagrams:
             # skip datagrams with no params
             if len(installationParametersDatagram.installationParameters) == 0:
@@ -153,11 +152,11 @@ class ScanALL(Scan):
         check if the filename is different from what recorded
         in the datagram. Requires `I` datagram
         '''
-        if 'I_Installation_Start' not in self.datagrams:
+        if 'I' not in self.datagrams:
             # then there's no way to check, so fail test
             return False
 
-        installationParametersDatagrams = self.datagrams['I_Installation_Start']
+        installationParametersDatagrams = self.datagrams['I']
         for installationParametersDatagram in installationParametersDatagrams:
 
             if 'RFN' not in installationParametersDatagram.installationParameters:
@@ -272,10 +271,10 @@ class ScanALL(Scan):
         return: True/False
         '''
 
-        if 'h_Height' not in self.datagrams:
+        if 'h' not in self.datagrams:
             # then there's no way to check, so fail test
             return False
 
-        heightDatagrams = self.datagrams['h_Height']
+        heightDatagrams = self.datagrams['h']
         firstHeightDatagram = heightDatagrams[0]
         return firstHeightDatagram.HeightType == 0
