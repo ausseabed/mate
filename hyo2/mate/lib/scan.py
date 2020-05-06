@@ -1,11 +1,36 @@
-import os
 from datetime import datetime
+from enum import Enum
+from typing import Optional, Dict, List, Any
+import os
 
 A_NONE = 'None'
 A_PARTIAL = 'Partial'
 A_FULL = 'Full'
 A_FAIL = 'Fail'
 A_PASS = 'Pass'
+
+
+class ScanState(str, Enum):
+    PASS = "pass"
+    FAIL = "fail"
+    WARNING = "warning"
+
+
+class ScanResult:
+    '''  results of a scan check. Bundles the state pass/fail with messages
+    and any format specific output data
+    '''
+    def __init__(self, state: ScanState, messages: List, data: Dict = None):
+        self.state = state
+        self.messages = messages
+        self.data = data
+
+    def __repr__(self):
+        return (
+            "state {} \n"
+            "messages: \n  {}\n"
+            "data {} \n".format(self.state, "\n  ".join(self.messages), self.data)
+        )
 
 
 class Scan:

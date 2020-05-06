@@ -1,7 +1,6 @@
 from typing import List
 
-from hyo2.mate.lib.scan import Scan
-from hyo2.mate.lib.scan import A_NONE, A_PARTIAL, A_FULL, A_FAIL, A_PASS
+from hyo2.mate.lib.scan import Scan, ScanResult, ScanState
 from ausseabed.qajson.model import QajsonParam, QajsonOutputs
 
 
@@ -57,21 +56,21 @@ class FilenameChangedCheck(ScanCheck):
     def run_check(self):
         filename_changed = self.scan.is_filename_changed()
 
-        msg = (
-            "Filename does not match name embedded within file contents"
+        messages = (
+            ["Filename does not match name embedded within file contents"]
             if filename_changed
             else None
         )
 
-        qa_pass = "no" if filename_changed else "yes"
+        state = ScanState.FAIL if filename_changed else ScanState.PASS
 
         self._output = QajsonOutputs(
             execution=None,
             files=None,
             count=None,
             percentage=None,
-            message=msg,
-            qa_pass=qa_pass
+            messages=messages,
+            check_state=state
         )
 
 
@@ -89,21 +88,21 @@ class DateChangedCheck(ScanCheck):
     def run_check(self):
         date_changed = not self.scan.is_date_match()
 
-        msg = (
-            "File date does not match date embedded within file contents"
+        messages = (
+            ["File date does not match date embedded within file contents"]
             if date_changed
             else None
         )
 
-        qa_pass = "no" if date_changed else "yes"
+        state = ScanState.FAIL if date_changed else ScanState.PASS
 
         self._output = QajsonOutputs(
             execution=None,
             files=None,
             count=None,
             percentage=None,
-            message=msg,
-            qa_pass=qa_pass
+            messages=messages,
+            check_state=state
         )
 
 
@@ -118,30 +117,16 @@ class BathymetryAvailableCheck(ScanCheck):
         ScanCheck.__init__(self, scan, params)
 
     def run_check(self):
-        bathy_avail = self.scan.bathymetry_availability()
-
-        qa_pass = None
-        msg = None
-        if bathy_avail == A_FULL:
-            qa_pass = "yes"
-            msg = None
-        elif bathy_avail == A_PARTIAL:
-            qa_pass = "no"
-            msg = "Only partial bathymetry is available"
-        elif bathy_avail == A_NONE:
-            qa_pass = "no"
-            msg = "No bathymetry is available"
-        else:
-            qa_pass = "no"
-            msg = "Bathymetry available flag {} is unknown".format(bathy_avail)
+        scan_result = self.scan.bathymetry_availability()
 
         self._output = QajsonOutputs(
             execution=None,
             files=None,
             count=None,
             percentage=None,
-            message=msg,
-            qa_pass=qa_pass
+            messages=scan_result.messages,
+            data=scan_result.data,
+            check_state=scan_result.state
         )
 
 
@@ -158,28 +143,28 @@ class BackscatterAvailableCheck(ScanCheck):
     def run_check(self):
         bs_avail = self.scan.backscatter_availability()
 
-        qa_pass = None
-        msg = None
+        state = None
+        messages = None
         if bs_avail == A_FULL:
-            qa_pass = "yes"
-            msg = None
+            state = ScanState.PASS
+            messages = None
         elif bs_avail == A_PARTIAL:
-            qa_pass = "no"
-            msg = "Backscatter available"
+            state = ScanState.WARNING
+            messages = ["Backscatter partially available"]
         elif bs_avail == A_NONE:
-            qa_pass = "no"
-            msg = "Backscatter available"
+            state = ScanState.FAIL
+            messages = ["Backscatter available"]
         else:
-            qa_pass = "no"
-            msg = "Backscatter available flag {} is unknown".format(bs_avail)
+            qa_pass = ScanState.FAIL
+            messages = ["Backscatter available flag {} is unknown".format(bs_avail)]
 
         self._output = QajsonOutputs(
             execution=None,
             files=None,
             count=None,
             percentage=None,
-            message=msg,
-            qa_pass=qa_pass
+            messages=messages,
+            check_state=state
         )
 
 
@@ -196,21 +181,21 @@ class RayTracingCheck(ScanCheck):
     def run_check(self):
         rt_avail = self.scan.ray_tracing_availability()
 
-        msg = (
+        messages = (
             None
             if rt_avail
-            else "Ray tracing is not available"
+            else ["Ray tracing is not available"]
         )
 
-        qa_pass = "yes" if rt_avail else "no"
+        state = ScanState.PASS if rt_avail else ScanState.FAIL
 
         self._output = QajsonOutputs(
             execution=None,
             files=None,
             count=None,
             percentage=None,
-            message=msg,
-            qa_pass=qa_pass
+            messages=messages,
+            check_state=state
         )
 
 
@@ -237,27 +222,27 @@ class MinimumPingCheck(ScanCheck):
         else:
             passed = self.scan.has_minimum_pings()
 
-        msg = (
+        messages = (
             None
             if passed
             else (
-                "Minimum ping count is less than threshold count of 10"
+                ["Minimum ping count is less than threshold count of 10"]
                 if threshold_param is None
                 else (
-                    "Minimum ping count is less than threshold count of {}"
-                    .format(threshold_param.value))
+                    ["Minimum ping count is less than threshold count of {}".format(threshold_param.value)]
+                )
             )
         )
 
-        qa_pass = "yes" if passed else "no"
+        state = ScanState.PASS if passed else ScanState.FAIL
 
         self._output = QajsonOutputs(
             execution=None,
             files=None,
             count=None,
             percentage=None,
-            message=msg,
-            qa_pass=qa_pass
+            messages=messages,
+            check_state=state
         )
 
 
@@ -274,55 +259,19 @@ class EllipsoidHeightAvailableCheck(ScanCheck):
     def run_check(self):
         eh_avail = self.scan.ellipsoid_height_availability()
 
-        msg = (
+        messages = (
             None
             if rt_avail
-            else "Ellipsoid height is not available"
+            else ["Ellipsoid height is not available"]
         )
 
-        qa_pass = "yes" if eh_avail else "no"
+        state = ScanState.PASS if eh_avail else ScanState.FAIL
 
         self._output = QajsonOutputs(
             execution=None,
             files=None,
             count=None,
             percentage=None,
-            message=msg,
-            qa_pass=qa_pass
-        )
-
-
-class PuStatusCheck(ScanCheck):
-    """Check the status of all sensor in the datagrams 1 type of nav string
-    in datagram 1 (NMEG GGK)
-    """
-    id = '37b967ac-3e82-40f6-ba24-4badcf1317f3'
-    name = "PU Status"
-    version = '1'
-
-    def __init__(self, scan: Scan, params):
-        ScanCheck.__init__(self, scan, params)
-
-    def run_check(self):
-        pu_status = self.scan.PU_status()
-
-        msg = None
-        qa_pass = None
-        if pu_status == A_PASS:
-            qa_pass = "yes"
-            msg = None
-        elif pu_status == A_FAIL:
-            qa_pass = "no"
-            msg = None
-        else:
-            qa_pass = "no"
-            msg = "PU Status flag {} is unknown".format(pu_status)
-
-        self._output = QajsonOutputs(
-            execution=None,
-            files=None,
-            count=None,
-            percentage=None,
-            message=msg,
-            qa_pass=qa_pass
+            messages=messages,
+            check_state=state
         )

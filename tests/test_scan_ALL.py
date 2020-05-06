@@ -49,8 +49,12 @@ class TestMateScanALL(unittest.TestCase):
         self.assertTrue(self.test.is_date_match())
 
     def test_bathymetry_availability(self):
-        self.assertEqual(self.test.bathymetry_availability(),
-                         scan.A_PARTIAL)
+        bathy_available_res = self.test.bathymetry_availability()
+
+        self.assertEqual(
+            bathy_available_res.state,
+            scan.ScanState.WARNING
+        )
 
     def test_backscatter_availability(self):
         self.assertEqual(self.test.backscatter_availability(),

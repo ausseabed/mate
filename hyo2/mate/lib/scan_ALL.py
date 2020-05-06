@@ -1,10 +1,13 @@
+from collections import namedtuple
 from copy import copy
 from datetime import *
+import functools
 import os
 import struct
 import pyall
 
 from hyo2.mate.lib.scan import Scan, A_NONE, A_PARTIAL, A_FULL, A_FAIL, A_PASS
+from hyo2.mate.lib.scan import ScanState, ScanResult
 
 
 class ScanALL(Scan):
@@ -77,6 +80,7 @@ class ScanALL(Scan):
 
             num_bytes, stx, dg_type, em_model, record_date, record_time, \
                 counter, serial_number = header
+
             time_stamp = pyall.to_DateTime(record_date, record_time)
 
             dg_type, datagram = self.all_reader.readDatagram()
@@ -106,7 +110,42 @@ class ScanALL(Scan):
                     # share the same type
                     datagram.read()
                     self.__push_datagram(dg_type, datagram)
-            elif dg_type in ['D', 'X', 'F', 'f', 'N', 'S', 'Y']:
+            elif dg_type == 'R':
+                datagram.read()
+                self.__push_datagram(dg_type, datagram)
+            elif dg_type == 'A':
+                datagram.read()
+                self.__push_datagram(dg_type, datagram)
+            elif dg_type == 'n':
+                datagram.read()
+                self.__push_datagram(dg_type, datagram)
+            elif dg_type == 'P':
+                datagram.read()
+                self.__push_datagram(dg_type, datagram)
+            elif dg_type == 'G':
+                # problem
+                datagram.read()
+                self.__push_datagram(dg_type, datagram)
+            elif dg_type == 'U':
+                datagram.read()
+                self.__push_datagram(dg_type, datagram)
+            elif dg_type == 'D':
+                datagram.read()
+                self.__push_datagram(dg_type, datagram)
+            elif dg_type == 'X':
+                datagram.read()
+                self.__push_datagram(dg_type, datagram)
+            elif dg_type == 'F':
+                datagram.read()
+                self.__push_datagram(dg_type, datagram)
+            elif dg_type == 'f':
+                datagram.read()
+                self.__push_datagram(dg_type, datagram)
+            elif dg_type == 'N':
+                datagram.read()
+                self.__push_datagram(dg_type, datagram)
+
+            if dg_type in ['D', 'X', 'F', 'f', 'N', 'S', 'Y']:
                 this_count = counter
                 last_count = self.scan_result[dg_type]['_seqNo']
                 if last_count is None:
@@ -184,23 +223,128 @@ class ScanALL(Scan):
             dt = rec['startTime'].strftime('%Y%m%d')
         return dt in os.path.basename(self.file_path)
 
-    def bathymetry_availability(self):
+    def bathymetry_availability(self) -> ScanResult:
         '''
         check the presence of all required datagrams for bathymetry processing
-        (I, R, D or X, A, n, P, h, F or f or N, G, U)
-        return: 'None'/'Partial'/'Full'
+        return: ScanResult
         '''
-        presence = self.scan_result.keys()
-        part1 = all(i in presence for i in ['I', 'R', 'A', 'n', 'P', 'G', 'U'])
-        part2 = any(i in presence for i in ['D', 'X'])
-        part3 = any(i in presence for i in ['F', 'f', 'N'])
-        if part1 and part2 and part3:
-            return A_FULL
-        partial = any(i in presence
-                      for i in ['A', 'P', 'D', 'X', 'F', 'f', 'N'])
-        if partial:
-            return A_PARTIAL
-        return A_NONE
+
+        # define a named tuple for bathy datagrams. Provides a means to define
+        # then reference this info.
+        BathyDatagram = namedtuple(
+            'BathyDatagram',
+            'id critical error_message alternatives'
+        )
+
+        bathy_datagrams = [
+            BathyDatagram(
+                'I',
+                False,
+                "Warning: installation parameters are missing please ensure that you have your lever arms and vessel frame parameters collected elsewhere.",
+                []
+            ),
+            BathyDatagram(
+                'R',
+                False,
+                "Warning: runtime parameters are missing these are critical for backscatter processing streams.  If just collecting bathymetry, please consider other users of this data.",
+                []
+            ),
+            BathyDatagram(
+                'A',
+                True,
+                "Critical: runtime parameters are missing these are critical for backscatter processing streams.  If just collecting bathymetry, please consider other users of this data.",
+                []
+            ),
+            BathyDatagram(
+                'n',
+                False,
+                "Warning: your network attitude and velocity is not being logged.  If you intend working in deeper water with a frequency modulated chirp you will need to interface this data.",
+                []
+            ),
+            BathyDatagram(
+                'P',
+                True,
+                "Critical: position data missing, you will not be able to process this data without ensuring this data is being collected.",
+                []
+            ),
+            BathyDatagram(
+                'G',
+                False,
+                "Warning: surface sound velocity data is missing, ensure your sensor is working or collect as many profiles as possible to attempt to compensate.",
+                []
+            ),
+            BathyDatagram(
+                'U',
+                False,
+                "Warning: no sound velocity profile data has been collected in the raw file, please ensure you are collecting this data elsewhere.",
+                []
+            ),
+            BathyDatagram(
+                'D',
+                False,
+                "Warning: neither datagram 'D' or 'X' were found, processed depth information is missing.",
+                ['X']
+            ),
+            BathyDatagram(
+                'F',
+                True,
+                "Critical: neither datagram 'F', 'f' or 'N' were found. Critical range and angle data missing, you are not collecting the data required for post processing.  If you are collecting processed depths it is possible to back process however it is not desirable and is a complex process.",
+                ['f', 'N']
+            )
+        ]
+
+        present_datagrams = self.datagrams.keys()
+
+        all_critical = True
+        all_noncritical = True
+        missing_critical = []
+        missing_noncritical = []
+        messages = []
+
+        for bathy_datagram in bathy_datagrams:
+            # the bathy datagram was not read from file
+            not_found = bathy_datagram.id not in present_datagrams
+            if not_found:
+                # it may be that one of the alternative datagrams exist, so
+                # loop through these to see if they exist
+                found_in_alts = functools.reduce(
+                    lambda a,b : (b in present_datagrams) or a, bathy_datagram.alternatives,
+                    False)
+                not_found = not found_in_alts
+
+            if not_found and bathy_datagram.critical:
+                all_critical = False
+                missing_critical.append(bathy_datagram.id)
+                messages.append(bathy_datagram.error_message)
+            elif not_found and not bathy_datagram.critical:
+                all_noncritical = False
+                missing_noncritical.append(bathy_datagram.id)
+                messages.append(bathy_datagram.error_message)
+
+        # include a lists of missing datagrams in result object
+        data = {
+            'missing_critical': missing_critical,
+            'missing_noncritical': missing_noncritical
+        }
+
+        if not all_critical:
+            return ScanResult(
+                state=ScanState.FAIL,
+                messages=messages,
+                data=data
+            )
+        elif not all_noncritical:
+            return ScanResult(
+                state=ScanState.WARNING,
+                messages=messages,
+                data=data
+            )
+        else:
+            return ScanResult(
+                state=ScanState.WARNING,
+                messages=messages
+            )
+
 
     def backscatter_availability(self):
         '''
