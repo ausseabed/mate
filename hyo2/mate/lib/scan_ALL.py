@@ -341,7 +341,7 @@ class ScanALL(Scan):
             )
         else:
             return ScanResult(
-                state=ScanState.WARNING,
+                state=ScanState.PASS,
                 messages=messages
             )
 
@@ -408,10 +408,8 @@ class ScanALL(Scan):
         check the presence of the datagrams h and the height type is 0 (The
         height is derived from the GGK or GGA datagram and is the height of
         the water level at the vertical datum (possibly motion corrected).)
-
         All parsed 'h' datagrams must have the height type of 0 to pass. BUT
         currently only the first 'h' datagram is read (for performance reasons)
-
         return: True/False
         '''
 
@@ -422,3 +420,50 @@ class ScanALL(Scan):
         heightDatagrams = self.datagrams['h']
         firstHeightDatagram = heightDatagrams[0]
         return firstHeightDatagram.HeightType == 0
+    
+    def ellipsoid_height_setup(self)  -> ScanResult:
+        '''
+        check the input positioning system string will likely contain heights
+        that are referenced to the ellipsoid and provide feedback that suggests
+        how to rectify if not
+        Logic is that if a PosMV or F180 is interfaced the interfaced string
+        needs to be a GGK message
+        if a seapath binary message is interfaced then there is no way to determine
+        which system is interfaced and the user will need to check documentation
+        to ensure the string interfaced for positioning contains ellipsoid heights
+
+        return: ScanResult
+        '''
+
+        inputtelegramsize = self.datagrams['n'][0].Attitude[0][6]
+        rawposinput = self.datagrams['P'][0].data[2:5]
+        if inputtelegramsize == 137:
+            inertialSystem = 'PosMV'
+        elif inputtelegramsize == 45 or inputtelegramsize == 43:
+            inertialSystem = 'Other'
+        else:
+            intertialSystem = 'F180'
+    
+        data = {
+            'inertial_pos_system': inertialSystem,
+            'pos_string': rawposinput
+        }
+    
+        if inertialSystem == 'PosMV' and rawposinput == 'GGK' or inertialSystem == 'F180' and rawposinput == 'GGK':
+            return ScanResult(
+                state=ScanState.PASS,
+                messages='',
+                data=data
+            )
+        elif inertialSystem == 'Other':
+            return ScanResult(
+                state=ScanState.WARNING,
+                messages="Unable to determine positioning system.  Check position input contains ellipsoid heights",
+                data=data
+            )
+        else:
+            return ScanResult(
+                state=ScanState.FAIL,
+                messages="Ellipsoid heights not being logged change your position input to a GGK string",
+                data=data
+            )
