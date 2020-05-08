@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import Enum
-from typing import Optional, Dict, List, Any
+from typing import Optional, Dict, List, Any, Union
 import os
 
 A_NONE = 'None'
@@ -20,9 +20,15 @@ class ScanResult:
     '''  results of a scan check. Bundles the state pass/fail with messages
     and any format specific output data
     '''
-    def __init__(self, state: ScanState, messages: List, data: Dict = None):
+    def __init__(
+        self,
+        state: ScanState,
+        messages: Optional[Union[List, str]] = [],
+        data: Dict = None
+    ):
         self.state = state
-        self.messages = messages
+        message_list = [messages] if isinstance(messages, str) else messages
+        self.messages = message_list
         self.data = data
 
     def __repr__(self):
