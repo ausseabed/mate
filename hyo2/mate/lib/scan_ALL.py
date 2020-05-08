@@ -403,6 +403,24 @@ class ScanALL(Scan):
                     return False
         return True
 
+    def ellipsoid_height_availability(self):
+        '''
+        check the presence of the datagrams h and the height type is 0 (The
+        height is derived from the GGK or GGA datagram and is the height of
+        the water level at the vertical datum (possibly motion corrected).)
+        All parsed 'h' datagrams must have the height type of 0 to pass. BUT
+        currently only the first 'h' datagram is read (for performance reasons)
+        return: True/False
+        '''
+
+        if 'h' not in self.datagrams:
+            # then there's no way to check, so fail test
+            return False
+
+        heightDatagrams = self.datagrams['h']
+        firstHeightDatagram = heightDatagrams[0]
+        return firstHeightDatagram.HeightType == 0
+    
     def ellipsoid_height_setup(self)  -> ScanResult:
         '''
         check the input positioning system string will likely contain heights
@@ -416,7 +434,6 @@ class ScanALL(Scan):
 
         return: ScanResult
         '''
-
 
         inputtelegramsize = self.datagrams['n'][0].Attitude[0][6]
         rawposinput = self.datagrams['P'][0].data[2:5]
