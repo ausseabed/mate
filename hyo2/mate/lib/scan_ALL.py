@@ -299,57 +299,7 @@ class ScanALL(Scan):
             )
         ]
 
-        present_datagrams = self.datagrams.keys()
-
-        all_critical = True
-        all_noncritical = True
-        missing_critical = []
-        missing_noncritical = []
-        messages = []
-
-        for bathy_datagram in bathy_datagrams:
-            # the bathy datagram was not read from file
-            not_found = bathy_datagram.id not in present_datagrams
-            if not_found:
-                # it may be that one of the alternative datagrams exist, so
-                # loop through these to see if they exist
-                found_in_alts = functools.reduce(
-                    lambda a,b : (b in present_datagrams) or a, bathy_datagram.alternatives,
-                    False)
-                not_found = not found_in_alts
-
-            if not_found and bathy_datagram.critical:
-                all_critical = False
-                missing_critical.append(bathy_datagram.id)
-                messages.append(bathy_datagram.error_message)
-            elif not_found and not bathy_datagram.critical:
-                all_noncritical = False
-                missing_noncritical.append(bathy_datagram.id)
-                messages.append(bathy_datagram.error_message)
-
-        # include a lists of missing datagrams in result object
-        data = {
-            'missing_critical': missing_critical,
-            'missing_noncritical': missing_noncritical
-        }
-
-        if not all_critical:
-            return ScanResult(
-                state=ScanState.FAIL,
-                messages=messages,
-                data=data
-            )
-        elif not all_noncritical:
-            return ScanResult(
-                state=ScanState.WARNING,
-                messages=messages,
-                data=data
-            )
-        else:
-            return ScanResult(
-                state=ScanState.PASS,
-                messages=messages
-            )
+        return self.__result_from_datagram_presence(bathy_datagrams)
 
     def backscatter_availability(self) -> ScanResult:
         '''
@@ -372,58 +322,7 @@ class ScanALL(Scan):
                 ['Y']
             )
         ]
-
-        present_datagrams = self.datagrams.keys()
-
-        all_critical = True
-        all_noncritical = True
-        missing_critical = []
-        missing_noncritical = []
-        messages = []
-
-        for bs_datagram in bs_datagrams:
-            # the bathy datagram was not read from file
-            not_found = bs_datagram.id not in present_datagrams
-            if not_found:
-                # it may be that one of the alternative datagrams exist, so
-                # loop through these to see if they exist
-                found_in_alts = functools.reduce(
-                    lambda a,b : (b in present_datagrams) or a, bs_datagram.alternatives,
-                    False)
-                not_found = not found_in_alts
-
-            if not_found and bs_datagram.critical:
-                all_critical = False
-                missing_critical.append(bs_datagram.id)
-                messages.append(bs_datagram.error_message)
-            elif not_found and not rt_datagram.critical:
-                all_noncritical = False
-                missing_noncritical.append(bs_datagram.id)
-                messages.append(rt_datagram.error_message)
-
-        # include a lists of missing datagrams in result object
-        data = {
-            'missing_critical': missing_critical,
-            'missing_noncritical': missing_noncritical
-        }
-
-        if not all_critical:
-            return ScanResult(
-                state=ScanState.FAIL,
-                messages=messages,
-                data=data
-            )
-        elif not all_noncritical:
-            return ScanResult(
-                state=ScanState.WARNING,
-                messages=messages,
-                data=data
-            )
-        else:
-            return ScanResult(
-                state=ScanState.PASS,
-                messages=messages
-            )
+        return self.__result_from_datagram_presence(bs_datagrams)
 
     def ray_tracing_availability(self) -> ScanResult:
         '''
@@ -489,6 +388,19 @@ class ScanALL(Scan):
             )
         ]
 
+        return self.__result_from_datagram_presence(rt_datagrams)
+
+    def __result_from_datagram_presence(self, required_datagrams):
+        '''
+        Util function, checks the datagrams that have been read during the
+        scan against the `required_datagrams` list. Critical vs Warning, and
+        associated messages are extracted from the attributes of the datagram
+        tuples in `required_datagrams`
+        return: a ScanResult
+        '''
+        # tl;dr this cuts down on amount of code that was duplicated across
+        # a number of check functions
+
         present_datagrams = self.datagrams.keys()
 
         all_critical = True
@@ -497,25 +409,25 @@ class ScanALL(Scan):
         missing_noncritical = []
         messages = []
 
-        for rt_datagram in rt_datagrams:
+        for required_datagram in required_datagrams:
             # the bathy datagram was not read from file
-            not_found = rt_datagram.id not in present_datagrams
+            not_found = required_datagram.id not in present_datagrams
             if not_found:
                 # it may be that one of the alternative datagrams exist, so
                 # loop through these to see if they exist
                 found_in_alts = functools.reduce(
-                    lambda a,b : (b in present_datagrams) or a, rt_datagram.alternatives,
+                    lambda a,b : (b in present_datagrams) or a, required_datagram.alternatives,
                     False)
                 not_found = not found_in_alts
 
-            if not_found and rt_datagram.critical:
+            if not_found and required_datagram.critical:
                 all_critical = False
-                missing_critical.append(rt_datagram.id)
-                messages.append(rt_datagram.error_message)
-            elif not_found and not rt_datagram.critical:
+                missing_critical.append(required_datagram.id)
+                messages.append(required_datagram.error_message)
+            elif not_found and not required_datagram.critical:
                 all_noncritical = False
-                missing_noncritical.append(rt_datagram.id)
-                messages.append(rt_datagram.error_message)
+                missing_noncritical.append(required_datagram.id)
+                messages.append(required_datagram.error_message)
 
         # include a lists of missing datagrams in result object
         data = {
