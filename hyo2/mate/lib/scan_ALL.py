@@ -144,6 +144,12 @@ class ScanALL(Scan):
             elif dg_type == 'N':
                 datagram.read()
                 self.__push_datagram(dg_type, datagram)
+            elif dg_type == 'S':
+                datagram.read()
+                self.__push_datagram(dg_type, datagram)
+            elif dg_type == 'Y':
+                datagram.read()
+                self.__push_datagram(dg_type, datagram)
 
             if dg_type in ['D', 'X', 'F', 'f', 'N', 'S', 'Y']:
                 this_count = counter
@@ -345,21 +351,79 @@ class ScanALL(Scan):
                 messages=messages
             )
 
-
-    def backscatter_availability(self):
+    def backscatter_availability(self) -> ScanResult:
         '''
         check the presence of all required datagrams for backscatter processing
-        (I, R, D or X, A, n, P, h, F or f or N, G, U, S or Y)
-        return: 'None'/'Partial'/'Full'
+        return: ScanResult
         '''
-        presence = self.scan_result.keys()
-        result1 = self.bathymetry_availability()
-        part4 = any(i in presence for i in ['S', 'Y'])
-        if result1 == A_FULL and part4:
-            return A_FULL
-        if result1 == A_NONE and not part4:
-            return A_NONE
-        return A_PARTIAL
+
+        # define a named tuple for datagrams. Provides a means to define
+        # then reference this info.
+        Datagram = namedtuple(
+            'Datagram',
+            'id critical error_message alternatives'
+        )
+
+        bs_datagrams = [
+            Datagram(
+                'S',
+                True,
+                "Critical: backscatter information is missing ('S' or 'Y' datagram).  You will not be able to process backscatter without seabed image data.  If you intend processing backscatter check your setup.",
+                ['Y']
+            )
+        ]
+
+        present_datagrams = self.datagrams.keys()
+
+        all_critical = True
+        all_noncritical = True
+        missing_critical = []
+        missing_noncritical = []
+        messages = []
+
+        for bs_datagram in bs_datagrams:
+            # the bathy datagram was not read from file
+            not_found = bs_datagram.id not in present_datagrams
+            if not_found:
+                # it may be that one of the alternative datagrams exist, so
+                # loop through these to see if they exist
+                found_in_alts = functools.reduce(
+                    lambda a,b : (b in present_datagrams) or a, bs_datagram.alternatives,
+                    False)
+                not_found = not found_in_alts
+
+            if not_found and bs_datagram.critical:
+                all_critical = False
+                missing_critical.append(bs_datagram.id)
+                messages.append(bs_datagram.error_message)
+            elif not_found and not rt_datagram.critical:
+                all_noncritical = False
+                missing_noncritical.append(bs_datagram.id)
+                messages.append(rt_datagram.error_message)
+
+        # include a lists of missing datagrams in result object
+        data = {
+            'missing_critical': missing_critical,
+            'missing_noncritical': missing_noncritical
+        }
+
+        if not all_critical:
+            return ScanResult(
+                state=ScanState.FAIL,
+                messages=messages,
+                data=data
+            )
+        elif not all_noncritical:
+            return ScanResult(
+                state=ScanState.WARNING,
+                messages=messages,
+                data=data
+            )
+        else:
+            return ScanResult(
+                state=ScanState.PASS,
+                messages=messages
+            )
 
     def ray_tracing_availability(self):
         '''
