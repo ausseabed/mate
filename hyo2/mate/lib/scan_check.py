@@ -179,23 +179,16 @@ class RayTracingCheck(ScanCheck):
         ScanCheck.__init__(self, scan, params)
 
     def run_check(self):
-        rt_avail = self.scan.ray_tracing_availability()
-
-        messages = (
-            None
-            if rt_avail
-            else ["Ray tracing is not available"]
-        )
-
-        state = ScanState.PASS if rt_avail else ScanState.FAIL
+        scan_result = self.scan.ray_tracing_availability()
 
         self._output = QajsonOutputs(
             execution=None,
             files=None,
             count=None,
             percentage=None,
-            messages=messages,
-            check_state=state
+            messages=scan_result.messages,
+            data=scan_result.data,
+            check_state=scan_result.state
         )
 
 

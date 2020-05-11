@@ -61,7 +61,11 @@ class TestMateScanALL(unittest.TestCase):
                          scan.A_PARTIAL)
 
     def test_ray_tracing_availability(self):
-        self.assertFalse(self.test.ray_tracing_availability())
+        rt_available_res = self.test.ray_tracing_availability()
+        self.assertEqual(
+            rt_available_res.state,
+            scan.ScanState.WARNING
+        )
 
     def test_ellipsoid_height_availability(self):
         self.assertTrue(self.test.ellipsoid_height_availability())
