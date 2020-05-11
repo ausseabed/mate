@@ -268,3 +268,29 @@ class EllipsoidHeightAvailableCheck(ScanCheck):
             messages=messages,
             check_state=state
         )
+
+
+class EllipsoidHeightSetupCheck(ScanCheck):
+    '''
+    Check the input positioning system string will likely contain heights
+    that are referenced to the ellipsoid
+    '''
+    id = '9b39cae1-dbb6-4f8c-b71a-d6f8ed843808'
+    name = "Ellipsoid Height Setup"
+    version = '1'
+
+    def __init__(self, scan: Scan, params):
+        ScanCheck.__init__(self, scan, params)
+
+    def run_check(self):
+        scan_result = self.scan.ellipsoid_height_setup()
+
+        self._output = QajsonOutputs(
+            execution=None,
+            files=None,
+            count=None,
+            percentage=None,
+            messages=scan_result.messages,
+            data=scan_result.data,
+            check_state=scan_result.state
+        )
