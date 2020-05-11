@@ -425,18 +425,6 @@ class ScanALL(Scan):
                 messages=messages
             )
 
-    def ray_tracing_availability(self):
-        '''
-        check the presence of required datagrams for ray tracing
-        (I, R, A, n, P, F or f or N, G, U)
-        return: True/False
-        '''
-        presence = self.scan_result.keys()
-        part0 = all(i in presence for i in ['I', 'R', 'A', 'n', 'P',
-                                            'G', 'U'])
-        part3 = any(i in presence for i in ['F', 'f', 'N'])
-        return part0 and part3
-
     def ray_tracing_availability(self) -> ScanResult:
         '''
         check the presence of all required datagrams for ray tracing processing
