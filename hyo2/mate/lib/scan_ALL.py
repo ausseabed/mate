@@ -75,6 +75,11 @@ class ScanALL(Scan):
         # datagram objects
         self.datagrams = {}
         while self.all_reader.moreData():
+            # update progress
+            self.progress = 1.0 - (self.all_reader.moreData() / self.file_size)
+            if progress_callback is not None:
+                progress_callback(self.progress)
+
             # read datagram header
             header = self.all_reader.readDatagramHeader()
 
