@@ -47,6 +47,8 @@ class ScanALL(Scan):
                     if result[dg_type]['count'] > pings:
                         break
                 result[dg_type]['seqNo'] = counter
+            else:
+                return None
         return c_bytes
 
     def __push_datagram(self, datagram_char, datagram):
@@ -180,10 +182,10 @@ class ScanALL(Scan):
         '''
         gets the version of the datagram format used by this file
         '''
-        rec = self.get_datagram_info('I')
+        rec = self.get_installation_parameters()
         dsv = None
-        if rec is not None and 'DSV' in rec['other'].keys():
-            dsv = rec['other']['DSV']
+        if rec is not None and 'DSV' in rec.keys():
+            dsv = rec['DSV']
         return dsv
 
     def is_filename_changed(self):
@@ -435,6 +437,12 @@ class ScanALL(Scan):
         return: ScanResult
         '''
 
+        if 'n' not in self.datagrams:
+            return ScanResult(
+                state=ScanState.WARNING,
+                messages="Unable to conduct height setup check.  No network attitude and velocity datagrams",
+                data={})
+        
         inputtelegramsize = self.datagrams['n'][0].Attitude[0][6]
         rawposinput = self.datagrams['P'][0].data[2:5]
         if inputtelegramsize == 137:
@@ -449,7 +457,7 @@ class ScanALL(Scan):
             'pos_string': rawposinput
         }
     
-        if inertialSystem == 'PosMV' and rawposinput == 'GGK' or inertialSystem == 'F180' and rawposinput == 'GGK':
+        if inertialSystem == 'PosMV' or inertialSystem == 'F180' and rawposinput == 'GGK':
             return ScanResult(
                 state=ScanState.PASS,
                 messages='',
