@@ -104,11 +104,20 @@ class TestMateScanALL(unittest.TestCase):
         )
 
     def test_backscatter_availability(self):
-        self.assertEqual(self.test.backscatter_availability(),
-                         scan.A_PARTIAL)
+        backscatter_available_res = self.test.backscatter_availability()
+
+        self.assertEqual(
+            backscatter_available_res.state,
+            scan.ScanState.PASS
+        )
 
     def test_ray_tracing_availability(self):
-        self.assertTrue(self.test.ray_tracing_availability())
+        ray_tracing_available_res = self.test.ray_tracing_availability()
+
+        self.assertEqual(
+            ray_tracing_available_res.state,
+            scan.ScanState.PASS
+        )
 
     def test_ellipsoid_height_availability(self):
         self.assertTrue(self.test.ellipsoid_height_availability())

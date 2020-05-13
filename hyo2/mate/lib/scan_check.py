@@ -141,30 +141,16 @@ class BackscatterAvailableCheck(ScanCheck):
         ScanCheck.__init__(self, scan, params)
 
     def run_check(self):
-        bs_avail = self.scan.backscatter_availability()
-
-        state = None
-        messages = None
-        if bs_avail == A_FULL:
-            state = ScanState.PASS
-            messages = None
-        elif bs_avail == A_PARTIAL:
-            state = ScanState.WARNING
-            messages = ["Backscatter partially available"]
-        elif bs_avail == A_NONE:
-            state = ScanState.FAIL
-            messages = ["Backscatter available"]
-        else:
-            qa_pass = ScanState.FAIL
-            messages = ["Backscatter available flag {} is unknown".format(bs_avail)]
+        scan_result = self.scan.backscatter_availability()
 
         self._output = QajsonOutputs(
             execution=None,
             files=None,
             count=None,
             percentage=None,
-            messages=messages,
-            check_state=state
+            messages=scan_result.messages,
+            data=scan_result.data,
+            check_state=scan_result.state
         )
 
 
@@ -179,23 +165,16 @@ class RayTracingCheck(ScanCheck):
         ScanCheck.__init__(self, scan, params)
 
     def run_check(self):
-        rt_avail = self.scan.ray_tracing_availability()
-
-        messages = (
-            None
-            if rt_avail
-            else ["Ray tracing is not available"]
-        )
-
-        state = ScanState.PASS if rt_avail else ScanState.FAIL
+        scan_result = self.scan.ray_tracing_availability()
 
         self._output = QajsonOutputs(
             execution=None,
             files=None,
             count=None,
             percentage=None,
-            messages=messages,
-            check_state=state
+            messages=scan_result.messages,
+            data=scan_result.data,
+            check_state=scan_result.state
         )
 
 
@@ -274,4 +253,30 @@ class EllipsoidHeightAvailableCheck(ScanCheck):
             percentage=None,
             messages=messages,
             check_state=state
+        )
+
+
+class EllipsoidHeightSetupCheck(ScanCheck):
+    '''
+    Check the input positioning system string will likely contain heights
+    that are referenced to the ellipsoid
+    '''
+    id = '9b39cae1-dbb6-4f8c-b71a-d6f8ed843808'
+    name = "Ellipsoid Height Setup"
+    version = '1'
+
+    def __init__(self, scan: Scan, params):
+        ScanCheck.__init__(self, scan, params)
+
+    def run_check(self):
+        scan_result = self.scan.ellipsoid_height_setup()
+
+        self._output = QajsonOutputs(
+            execution=None,
+            files=None,
+            count=None,
+            percentage=None,
+            messages=scan_result.messages,
+            data=scan_result.data,
+            check_state=scan_result.state
         )

@@ -77,12 +77,16 @@ class ScanALL(Scan):
         # datagram objects
         self.datagrams = {}
         while self.all_reader.moreData():
+            # update progress
+            self.progress = 1.0 - (self.all_reader.moreData() / self.file_size)
+            if progress_callback is not None:
+                progress_callback(self.progress)
+
             # read datagram header
             header = self.all_reader.readDatagramHeader()
-
             num_bytes, stx, dg_type, em_model, record_date, record_time, \
                 counter, serial_number = header
-
+                
             time_stamp = pyall.to_DateTime(record_date, record_time)
 
             dg_type, datagram = self.all_reader.readDatagram()
@@ -144,6 +148,12 @@ class ScanALL(Scan):
                 datagram.read()
                 self.__push_datagram(dg_type, datagram)
             elif dg_type == 'N':
+                datagram.read()
+                self.__push_datagram(dg_type, datagram)
+            elif dg_type == 'S':
+                datagram.read()
+                self.__push_datagram(dg_type, datagram)
+            elif dg_type == 'Y':
                 datagram.read()
                 self.__push_datagram(dg_type, datagram)
 
@@ -233,67 +243,169 @@ class ScanALL(Scan):
 
         # define a named tuple for bathy datagrams. Provides a means to define
         # then reference this info.
-        BathyDatagram = namedtuple(
-            'BathyDatagram',
+        Datagram = namedtuple(
+            'Datagram',
             'id critical error_message alternatives'
         )
 
         bathy_datagrams = [
-            BathyDatagram(
+            Datagram(
                 'I',
                 False,
                 "Warning: installation parameters are missing please ensure that you have your lever arms and vessel frame parameters collected elsewhere.",
                 []
             ),
-            BathyDatagram(
+            Datagram(
                 'R',
                 False,
                 "Warning: runtime parameters are missing these are critical for backscatter processing streams.  If just collecting bathymetry, please consider other users of this data.",
                 []
             ),
-            BathyDatagram(
+            Datagram(
                 'A',
                 True,
                 "Critical: runtime parameters are missing these are critical for backscatter processing streams.  If just collecting bathymetry, please consider other users of this data.",
                 []
             ),
-            BathyDatagram(
+            Datagram(
                 'n',
                 False,
                 "Warning: your network attitude and velocity is not being logged.  If you intend working in deeper water with a frequency modulated chirp you will need to interface this data.",
                 []
             ),
-            BathyDatagram(
+            Datagram(
                 'P',
                 True,
                 "Critical: position data missing, you will not be able to process this data without ensuring this data is being collected.",
                 []
             ),
-            BathyDatagram(
+            Datagram(
                 'G',
                 False,
                 "Warning: surface sound velocity data is missing, ensure your sensor is working or collect as many profiles as possible to attempt to compensate.",
                 []
             ),
-            BathyDatagram(
+            Datagram(
                 'U',
                 False,
                 "Warning: no sound velocity profile data has been collected in the raw file, please ensure you are collecting this data elsewhere.",
                 []
             ),
-            BathyDatagram(
+            Datagram(
                 'D',
                 False,
                 "Warning: neither datagram 'D' or 'X' were found, processed depth information is missing.",
                 ['X']
             ),
-            BathyDatagram(
+            Datagram(
                 'F',
                 True,
                 "Critical: neither datagram 'F', 'f' or 'N' were found. Critical range and angle data missing, you are not collecting the data required for post processing.  If you are collecting processed depths it is possible to back process however it is not desirable and is a complex process.",
                 ['f', 'N']
             )
         ]
+
+        return self.__result_from_datagram_presence(bathy_datagrams)
+
+    def backscatter_availability(self) -> ScanResult:
+        '''
+        check the presence of all required datagrams for backscatter processing
+        return: ScanResult
+        '''
+
+        # define a named tuple for datagrams. Provides a means to define
+        # then reference this info.
+        Datagram = namedtuple(
+            'Datagram',
+            'id critical error_message alternatives'
+        )
+
+        bs_datagrams = [
+            Datagram(
+                'S',
+                True,
+                "Critical: backscatter information is missing ('S' or 'Y' datagram).  You will not be able to process backscatter without seabed image data.  If you intend processing backscatter check your setup.",
+                ['Y']
+            )
+        ]
+        return self.__result_from_datagram_presence(bs_datagrams)
+
+    def ray_tracing_availability(self) -> ScanResult:
+        '''
+        check the presence of all required datagrams for ray tracing processing
+        return: ScanResult
+        '''
+
+        # define a named tuple for datagrams. Provides a means to define
+        # then reference this info.
+        Datagram = namedtuple(
+            'Datagram',
+            'id critical error_message alternatives'
+        )
+
+        rt_datagrams = [
+            Datagram(
+                'I',
+                False,
+                "Warning: installation parameters are missing please ensure that you have your lever arms and vessel frame parameters collected elsewhere.",
+                []
+            ),
+            Datagram(
+                'R',
+                False,
+                "Warning: runtime parameters are missing these are critical for backscatter processing streams.  If just collecting bathymetry, please consider other users of this data.",
+                []
+            ),
+            Datagram(
+                'A',
+                True,
+                "Critical: runtime parameters are missing these are critical for backscatter processing streams.  If just collecting bathymetry, please consider other users of this data.",
+                []
+            ),
+            Datagram(
+                'n',
+                False,
+                "Warning: your network attitude and velocity is not being logged.  If you intend working in deeper water with a frequency modulated chirp you will need to interface this data.",
+                []
+            ),
+            Datagram(
+                'P',
+                True,
+                "Critical: position data missing, you will not be able to process this data without ensuring this data is being collected.",
+                []
+            ),
+            Datagram(
+                'G',
+                False,
+                "Warning: surface sound velocity data is missing, ensure your sensor is working or collect as many profiles as possible to attempt to compensate.",
+                []
+            ),
+            Datagram(
+                'U',
+                False,
+                "Warning: no sound velocity profile data has been collected in the raw file, please ensure you are collecting this data elsewhere.",
+                []
+            ),
+            Datagram(
+                'F',
+                True,
+                "Critical: neither datagram 'F', 'f' or 'N' were found. Critical range and angle data missing, you are not collecting the data required for post processing.  If you are collecting processed depths it is possible to back process however it is not desirable and is a complex process.",
+                ['f', 'N']
+            )
+        ]
+
+        return self.__result_from_datagram_presence(rt_datagrams)
+
+    def __result_from_datagram_presence(self, required_datagrams):
+        '''
+        Util function, checks the datagrams that have been read during the
+        scan against the `required_datagrams` list. Critical vs Warning, and
+        associated messages are extracted from the attributes of the datagram
+        tuples in `required_datagrams`
+        return: a ScanResult
+        '''
+        # tl;dr this cuts down on amount of code that was duplicated across
+        # a number of check functions
 
         present_datagrams = self.datagrams.keys()
 
@@ -303,25 +415,25 @@ class ScanALL(Scan):
         missing_noncritical = []
         messages = []
 
-        for bathy_datagram in bathy_datagrams:
+        for required_datagram in required_datagrams:
             # the bathy datagram was not read from file
-            not_found = bathy_datagram.id not in present_datagrams
+            not_found = required_datagram.id not in present_datagrams
             if not_found:
                 # it may be that one of the alternative datagrams exist, so
                 # loop through these to see if they exist
                 found_in_alts = functools.reduce(
-                    lambda a,b : (b in present_datagrams) or a, bathy_datagram.alternatives,
+                    lambda a,b : (b in present_datagrams) or a, required_datagram.alternatives,
                     False)
                 not_found = not found_in_alts
 
-            if not_found and bathy_datagram.critical:
+            if not_found and required_datagram.critical:
                 all_critical = False
-                missing_critical.append(bathy_datagram.id)
-                messages.append(bathy_datagram.error_message)
-            elif not_found and not bathy_datagram.critical:
+                missing_critical.append(required_datagram.id)
+                messages.append(required_datagram.error_message)
+            elif not_found and not required_datagram.critical:
                 all_noncritical = False
-                missing_noncritical.append(bathy_datagram.id)
-                messages.append(bathy_datagram.error_message)
+                missing_noncritical.append(required_datagram.id)
+                messages.append(required_datagram.error_message)
 
         # include a lists of missing datagrams in result object
         data = {
@@ -346,34 +458,6 @@ class ScanALL(Scan):
                 state=ScanState.PASS,
                 messages=messages
             )
-
-
-    def backscatter_availability(self):
-        '''
-        check the presence of all required datagrams for backscatter processing
-        (I, R, D or X, A, n, P, h, F or f or N, G, U, S or Y)
-        return: 'None'/'Partial'/'Full'
-        '''
-        presence = self.scan_result.keys()
-        result1 = self.bathymetry_availability()
-        part4 = any(i in presence for i in ['S', 'Y'])
-        if result1 == A_FULL and part4:
-            return A_FULL
-        if result1 == A_NONE and not part4:
-            return A_NONE
-        return A_PARTIAL
-
-    def ray_tracing_availability(self):
-        '''
-        check the presence of required datagrams for ray tracing
-        (I, R, A, n, P, F or f or N, G, U)
-        return: True/False
-        '''
-        presence = self.scan_result.keys()
-        part0 = all(i in presence for i in ['I', 'R', 'A', 'n', 'P',
-                                            'G', 'U'])
-        part3 = any(i in presence for i in ['F', 'f', 'N'])
-        return part0 and part3
 
     def is_missing_pings_tolerable(self, thresh=1.0):
         '''
@@ -422,7 +506,7 @@ class ScanALL(Scan):
         heightDatagrams = self.datagrams['h']
         firstHeightDatagram = heightDatagrams[0]
         return firstHeightDatagram.HeightType == 0
-    
+
     def ellipsoid_height_setup(self)  -> ScanResult:
         '''
         check the input positioning system string will likely contain heights
@@ -451,12 +535,12 @@ class ScanALL(Scan):
             inertialSystem = 'Other'
         else:
             intertialSystem = 'F180'
-    
+
         data = {
             'inertial_pos_system': inertialSystem,
             'pos_string': rawposinput
         }
-    
+
         if inertialSystem == 'PosMV' or inertialSystem == 'F180' and rawposinput == 'GGK':
             return ScanResult(
                 state=ScanState.PASS,

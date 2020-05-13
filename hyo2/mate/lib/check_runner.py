@@ -2,6 +2,7 @@ import copy
 from datetime import datetime
 import logging
 import os
+import traceback
 from typing import Callable
 
 from ausseabed.qajson.model import QajsonParam, QajsonOutputs, \
@@ -180,7 +181,7 @@ class CheckRunner:
                     checkoutputs = check.output
                 except Exception as e:
                     checkstatus = "failed"
-                    checkerrormessage = str(e)
+                    checkerrormessage = traceback.format_exc()
                 checkend = datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f")
 
                 execution = {}
