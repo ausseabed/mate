@@ -88,9 +88,8 @@ class ScanALL(Scan):
                 counter, serial_number = header
                 
             time_stamp = pyall.to_DateTime(record_date, record_time)
-
+            
             dg_type, datagram = self.all_reader.readDatagram()
-            # print( (dg_type, datagram) )
 
             if dg_type not in self.scan_result.keys():
                 self.scan_result[dg_type] = copy(self.default_info)

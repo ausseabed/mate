@@ -116,7 +116,7 @@ class TestMateScanALL(unittest.TestCase):
 
         self.assertEqual(
             ray_tracing_available_res.state,
-            scan.ScanState.PASS
+            scan.ScanState.WARNING
         )
 
     def test_ellipsoid_height_availability(self):
