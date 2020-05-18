@@ -28,7 +28,8 @@ jobs:
       - run:
           command: |  # check test data
             ls -al ~/tests/test_data_remote
-            cp -r ~/tests/test_data_remote ~/build/tests/test_data_remote
+            mkdir ~/build/tests/test_data_remote
+            cp ~/tests/test_data_remote/* ~/build/tests/test_data_remote/.
       - checkout
       - run:
           command: |  # use pipenv to install dependencies
