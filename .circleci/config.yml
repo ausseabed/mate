@@ -24,10 +24,11 @@ jobs:
       - image: circleci/python:3.6.4
     steps:
       - attach_workspace:
-          at: ~/build/tests/test_data_remote
+          at: ~/tests/test_data_remote
       - run:
           command: |  # check test data
-            ls -al ~/build/tests/test_data_remote
+            ls -al ~/tests/test_data_remote
+            cp ~/tests/test_data_remote ~/build/tests/test_data_remote
       - checkout
       - run:
           command: |  # use pipenv to install dependencies
