@@ -10,12 +10,13 @@ TEST_FILE = "0243_P007_MBES_EM122_20150207_044356_Supporter_GA4430.all"
 
 class TestMateScanALL(unittest.TestCase):
 
-    def setUp(self):
-        self.test_file = os.path.abspath(os.path.join(
+    @classmethod
+    def setUpClass(cls):
+        cls.test_file = os.path.abspath(os.path.join(
                                          os.path.dirname(__file__),
                                          "test_data", TEST_FILE))
-        self.test = ScanALL(self.test_file)
-        self.test.scan_datagram()
+        cls.test = ScanALL(cls.test_file)
+        cls.test.scan_datagram()
 
     def test_time_str(self):
         return self.test._time_str(time.time())

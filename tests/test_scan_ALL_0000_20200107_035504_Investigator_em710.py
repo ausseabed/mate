@@ -16,6 +16,7 @@ test_data_file_object = None
 # test data dictionary.
 test_data_dict = {}
 
+
 # load test data from ./test_data.csv file.
 def load_test_data():
     global test_data_file_object, test_data_dict
@@ -28,7 +29,8 @@ def load_test_data():
         test_data_dict[row[0]] = {key: value for key, value in zip(headers, row[1:])}
     print('')
     print('open and load data from QAQC_Test_Data.csv complete.')
-    
+
+
 # close and release the test data file object.
 def close_test_data_file():
     global test_data_file_object
@@ -38,16 +40,24 @@ def close_test_data_file():
         print('')
         print('close file QAQC_Test_Data.csv complete.')
 
+
 TEST_FILE = "0000_20200107_035504_Investigator_em710.all"
+
 
 class TestMateScanALL(unittest.TestCase):
 
     # class level setup function, execute once only before any test function.
     @classmethod
     def setUpClass(cls):
-        load_test_data() 
+        cls.test_file = os.path.abspath(os.path.join(
+                                         os.path.dirname(__file__),
+                                         "test_data", TEST_FILE))
+        cls.test = ScanALL(cls.test_file)
+        cls.test.scan_datagram()
+
+        load_test_data()
         print('setUpClass')
-    
+
     # class level setup function, execute once only after all test function's execution.
     @classmethod
     def tearDownClass(cls):
@@ -55,15 +65,11 @@ class TestMateScanALL(unittest.TestCase):
         print('tearDownClass')
 
     def setUp(self):
-        self.test_file = os.path.abspath(os.path.join(
-                                         os.path.dirname(__file__),
-                                         "test_data",TEST_FILE))
-        self.test = ScanALL(self.test_file)
-        self.test.scan_datagram()
+        pass
 
     def test_time_str(self):
         return self.test._time_str(time.time())
-    
+
     def test_get_datagram_format_version(self):
         self.assertEqual(self.test.get_datagram_format_version(), test_data_dict[TEST_FILE]['DSV'])
 
@@ -131,11 +137,12 @@ class TestMateScanALL(unittest.TestCase):
 
     def test_ellipsoid_height_setup(self):
         ellipsoid_height_set = self.test.ellipsoid_height_setup()
-        
+
         self.assertEqual(
             ellipsoid_height_set.state,
             scan.ScanState.PASS
         )
+
 
 def suite():
     s = unittest.TestSuite()
