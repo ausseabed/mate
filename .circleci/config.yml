@@ -1,10 +1,33 @@
 version: 2
 jobs:
+
+  sync-test-data:
+    docker:
+     - image: mesosphere/aws-cli
+    working_directory: ~/test-data
+    steps:
+      - attach_workspace:
+          at: /sync
+      - run: apk update
+      - run: apk add ca-certificates
+      - run:
+          command: |
+            aws s3 sync s3://ausseabed-marine-qa-data/mate-test-data/ /sync
+      - run: ls -la /sync
+      - persist_to_workspace:
+          root: /sync
+          paths: .
+
   build:
     working_directory: ~/build
     docker:
       - image: circleci/python:3.6.4
     steps:
+      - attach_workspace:
+          at: ~/build/tests/test_data_remote
+      - run:
+          command: |  # check test data
+            ls -al ~/build/tests/test_data_remote
       - checkout
       - run:
           command: |  # use pipenv to install dependencies
