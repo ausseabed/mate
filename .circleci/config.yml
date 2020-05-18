@@ -41,3 +41,12 @@ jobs:
           path: test-results
       - store_artifacts:
           path: test-results
+
+workflows:
+  version: 2
+  test:
+    jobs:
+      - sync-test-data
+      - build:
+          requires:
+            - sync-test-data
