@@ -1,5 +1,10 @@
 syntax: glob
 
+# Mate specific ignores
+tests/test_data_remote/*.all
+# really make sure no raw data files are committed
+**/*.all
+
 # temp files
 *.sh~
 *.*~
