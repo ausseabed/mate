@@ -537,7 +537,7 @@ class ScanALL(Scan):
 
         data = {
             'inertial_pos_system': inertialSystem,
-            'pos_string': rawposinput
+            'pos_string': rawposinput.decode("utf-8")
         }
 
         if inertialSystem == 'PosMV' or inertialSystem == 'F180' and rawposinput == 'GGK':
