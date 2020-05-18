@@ -106,4 +106,4 @@ Set environment variables for AWS::
 
 Download data from S3 into current folder::
 
-    aws s3 sync s3://ausseabed-test-data/ .
+    aws s3 sync s3://ausseabed-marine-qa-data/mate-test-data/ ./tests/test_data_remote
