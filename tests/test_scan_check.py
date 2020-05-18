@@ -14,7 +14,7 @@ class TestMateScanCheck(unittest.TestCase):
     def setUp(self):
         self.test_file = os.path.abspath(os.path.join(
                                          os.path.dirname(__file__),
-                                         "test_data", TEST_FILE))
+                                         "test_data_remote", TEST_FILE))
 
     def test_get_check(self):
         scan = get_scan(self.test_file, 'all')

@@ -51,7 +51,7 @@ class TestMateScanALL(unittest.TestCase):
     def setUpClass(cls):
         cls.test_file = os.path.abspath(os.path.join(
                                          os.path.dirname(__file__),
-                                         "test_data", TEST_FILE))
+                                         "test_data_remote", TEST_FILE))
         cls.test = ScanALL(cls.test_file)
         cls.test.scan_datagram()
         load_test_data()

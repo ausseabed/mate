@@ -72,6 +72,7 @@ Unit tests can be run as follows::
 
     python -m pytest --cov=hyo2.mate --cov-report=html  tests/
 
+**Note:** Unit tests will fail if the test data has not been downloaded (see following section)
 
 Test Data
 ---------
@@ -92,7 +93,7 @@ Set environment variables for AWS::
 
 Download data from S3 into current folder::
 
-    aws s3 sync s3://ausseabed-test-data/ .
+    aws s3 sync s3://ausseabed-marine-qa-data/mate-test-data/ ./tests/test_data_remote
 
 
 Linux, MacOS instructions
