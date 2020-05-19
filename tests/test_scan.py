@@ -2,7 +2,7 @@ import unittest
 import os
 import pytest
 import time
-from hyo2.mate.lib.scan_utils import get_scan
+from hyo2.mate.lib.utils import get_scan
 from hyo2.mate.lib.scan import ScanResult, ScanState
 
 TEST_FILE1 = "0200_MBES_EM122_20150203_010431_Supporter_GA4430.all"

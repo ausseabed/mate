@@ -8,7 +8,7 @@ from typing import Callable
 from ausseabed.qajson.model import QajsonParam, QajsonOutputs, \
     QajsonExecution, QajsonInputs
 
-from hyo2.mate.lib.scan_utils import get_scan, get_check, is_check_supported
+from hyo2.mate.lib.utils import get_scan, get_check, is_check_supported
 
 logger = logging.getLogger(__name__)
 

@@ -1,7 +1,7 @@
 from typing import List, Dict, NoReturn, Callable
 from pathlib import Path
 
-from hyo2.mate.lib.scan_utils import all_checks
+from hyo2.mate.lib.utils import all_checks
 from hyo2.mate.lib.check_runner import CheckRunner
 from hyo2.qax.lib.plugin import QaxCheckToolPlugin, QaxCheckReference, \
     QaxFileType

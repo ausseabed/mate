@@ -5,7 +5,7 @@ import time
 import unittest
 
 from hyo2.mate.lib.check_runner import CheckRunner
-from hyo2.mate.lib.scan_utils import get_scan
+from hyo2.mate.lib.utils import get_scan
 
 qajson = """
 [
