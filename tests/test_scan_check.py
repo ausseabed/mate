@@ -17,7 +17,7 @@ class TestMateScanCheck(unittest.TestCase):
                                          "test_data_remote", TEST_FILE))
 
     def test_get_check(self):
-        scan = get_scan(self.test_file, 'all')
+        scan = get_scan(self.test_file, 'all', 'Raw Files')
 
         # id and version for the filename changed check
         check_id = '7761e08b-1380-46fa-a7eb-f1f41db38541'
@@ -28,7 +28,7 @@ class TestMateScanCheck(unittest.TestCase):
         self.assertEqual(type(check).__name__, 'FilenameChangedCheck')
 
     def test_get_check_bad_version(self):
-        scan = get_scan(self.test_file, 'all')
+        scan = get_scan(self.test_file, 'all', 'Raw Files')
 
         # id and version for the filename changed check
         check_id = '7761e08b-1380-46fa-a7eb-f1f41db38541'
