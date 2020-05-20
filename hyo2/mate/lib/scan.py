@@ -60,7 +60,9 @@ class Scan:
 
     def __init__(self, file_path):
         self.file_path = file_path
-        self.file_size = os.path.getsize(file_path)
+        self.file_size = 0
+        if os.path.exists(file_path):
+            self.file_size = os.path.getsize(file_path)
 
     def _time_str(self, unix_time):
         '''return time string in ISO format'''

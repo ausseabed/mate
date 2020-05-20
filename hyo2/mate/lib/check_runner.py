@@ -137,13 +137,19 @@ class CheckRunner:
         total_file_size = 0
         processed_files_size = 0
         for (filename, filetype), checklist in self._file_checks.items():
-            total_file_size += os.path.getsize(filename)
+            if os.path.exists(filename):
+                total_file_size += os.path.getsize(filename)
 
         for (filename, filetype), checklist in self._file_checks.items():
             if self.stopped:
                 return
-            file_size = os.path.getsize(filename)
-            file_size_fraction = file_size / total_file_size
+
+            file_size = 0
+            if os.path.exists(filename):
+                file_size = os.path.getsize(filename)
+            file_size_fraction = 1
+            if total_file_size != 0:
+                file_size_fraction = file_size / total_file_size
             _, extension = os.path.splitext(filename)
             # remove the `.` char from extension
             file_extension = extension[1:]
