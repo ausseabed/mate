@@ -5,6 +5,36 @@
             "checks": [
                 {
                     "info": {
+                        "id": "e57b7811-5863-49b3-bd06-a73de0add615",
+                        "name": "SVP File Available",
+                        "description": "SVP file exists and is of non zero size",
+                        "version": "1",
+                        "group": {
+                            "id": "123",
+                            "name": "123"
+                        }
+                    },
+                    "inputs": {
+                        "files": [
+                            {
+                                "path": "/does/not/exist/asdfs",
+                                "description": "raw data",
+                                "file_type": "SVP Files"
+                            }
+                        ]
+                    },
+                    "outputs": {
+                        "execution": {
+                            "status": "completed",
+                            "start": "2020-05-20T19:54:44.949238",
+                            "end": "2020-05-20T19:54:44.949288"
+                        },
+                        "messages": "SVP file does not exist",
+                        "check_state": "fail"
+                    }
+                },
+                {
+                    "info": {
                         "id": "7761e08b-1380-46fa-a7eb-f1f41db38541",
                         "name": "Filename checked",
                         "description": "all filename is consistent with that recorded in file metadata",
@@ -17,16 +47,17 @@
                     "inputs": {
                         "files": [
                             {
-                                "path": "tests/test_data/0243_P007_MBES_EM122_20150207_044356_Supporter_GA4430.all",
-                                "description": "raw data"
+                                "path": "tests/test_data_remote/0243_P007_MBES_EM122_20150207_044356_Supporter_GA4430.all",
+                                "description": "raw data",
+                                "file_type": "Raw Files"
                             }
                         ]
                     },
                     "outputs": {
                         "execution": {
                             "status": "completed",
-                            "start": "2020-05-06T23:06:23.818457",
-                            "end": "2020-05-06T23:06:23.818531"
+                            "start": "2020-05-20T19:54:45.009724",
+                            "end": "2020-05-20T19:54:45.009773"
                         },
                         "messages": [
                             "Filename does not match name embedded within file contents"
@@ -48,16 +79,17 @@
                     "inputs": {
                         "files": [
                             {
-                                "path": "tests/test_data/0243_P007_MBES_EM122_20150207_044356_Supporter_GA4430.all",
-                                "description": "raw data"
+                                "path": "tests/test_data_remote/0243_P007_MBES_EM122_20150207_044356_Supporter_GA4430.all",
+                                "description": "raw data",
+                                "file_type": "Raw Files"
                             }
                         ]
                     },
                     "outputs": {
                         "execution": {
                             "status": "completed",
-                            "start": "2020-05-06T23:06:23.818555",
-                            "end": "2020-05-06T23:06:23.818577"
+                            "start": "2020-05-20T19:54:45.009792",
+                            "end": "2020-05-20T19:54:45.009821"
                         },
                         "check_state": "pass"
                     }
@@ -76,16 +108,17 @@
                     "inputs": {
                         "files": [
                             {
-                                "path": "tests/test_data/0243_P007_MBES_EM122_20150207_044356_Supporter_GA4430.all",
-                                "description": "raw data"
+                                "path": "tests/test_data_remote/0243_P007_MBES_EM122_20150207_044356_Supporter_GA4430.all",
+                                "description": "raw data",
+                                "file_type": "Raw Files"
                             }
                         ]
                     },
                     "outputs": {
                         "execution": {
                             "status": "completed",
-                            "start": "2020-05-06T23:06:23.818589",
-                            "end": "2020-05-06T23:06:23.818996"
+                            "start": "2020-05-20T19:54:45.009832",
+                            "end": "2020-05-20T19:54:45.010370"
                         },
                         "messages": [
                             "Warning: your network attitude and velocity is not being logged.  If you intend working in deeper water with a frequency modulated chirp you will need to interface this data.",
@@ -115,18 +148,20 @@
                     "inputs": {
                         "files": [
                             {
-                                "path": "tests/test_data/0243_P007_MBES_EM122_20150207_044356_Supporter_GA4430.all",
-                                "description": "raw data"
+                                "path": "tests/test_data_remote/0243_P007_MBES_EM122_20150207_044356_Supporter_GA4430.all",
+                                "description": "raw data",
+                                "file_type": "Raw Files"
                             }
                         ]
                     },
                     "outputs": {
                         "execution": {
-                            "status": "failed",
-                            "start": "2020-05-06T23:06:23.819381",
-                            "end": "2020-05-06T23:06:23.819695",
-                            "error": "name 'A_FULL' is not defined"
-                        }
+                            "status": "completed",
+                            "start": "2020-05-20T19:54:45.011105",
+                            "end": "2020-05-20T19:54:45.011438"
+                        },
+                        "messages": [],
+                        "check_state": "pass"
                     }
                 },
                 {
@@ -143,21 +178,30 @@
                     "inputs": {
                         "files": [
                             {
-                                "path": "tests/test_data/0243_P007_MBES_EM122_20150207_044356_Supporter_GA4430.all",
-                                "description": "raw data"
+                                "path": "tests/test_data_remote/0243_P007_MBES_EM122_20150207_044356_Supporter_GA4430.all",
+                                "description": "raw data",
+                                "file_type": "Raw Files"
                             }
                         ]
                     },
                     "outputs": {
                         "execution": {
                             "status": "completed",
-                            "start": "2020-05-06T23:06:23.819354",
-                            "end": "2020-05-06T23:06:23.819370"
+                            "start": "2020-05-20T19:54:45.010747",
+                            "end": "2020-05-20T19:54:45.011084"
                         },
                         "messages": [
-                            "Ray tracing is not available"
+                            "Warning: your network attitude and velocity is not being logged.  If you intend working in deeper water with a frequency modulated chirp you will need to interface this data.",
+                            "Warning: surface sound velocity data is missing, ensure your sensor is working or collect as many profiles as possible to attempt to compensate."
                         ],
-                        "check_state": "fail"
+                        "data": {
+                            "missing_critical": [],
+                            "missing_noncritical": [
+                                "n",
+                                "G"
+                            ]
+                        },
+                        "check_state": "warning"
                     }
                 },
                 {
@@ -174,8 +218,9 @@
                     "inputs": {
                         "files": [
                             {
-                                "path": "tests/test_data/0200_MBES_EM122_20150203_010431_Supporter_GA4430.all",
-                                "description": "raw data"
+                                "path": "tests/test_data_remote/0200_MBES_EM122_20150203_010431_Supporter_GA4430.all",
+                                "description": "raw data",
+                                "file_type": "Raw Files"
                             }
                         ]
                     },
@@ -185,8 +230,8 @@
                     "outputs": {
                         "execution": {
                             "status": "completed",
-                            "start": "2020-05-06T23:06:23.826819",
-                            "end": "2020-05-06T23:06:23.827357"
+                            "start": "2020-05-20T19:54:45.018516",
+                            "end": "2020-05-20T19:54:45.019646"
                         },
                         "check_state": "pass"
                     }
@@ -205,8 +250,9 @@
                     "inputs": {
                         "files": [
                             {
-                                "path": "tests/test_data/0243_P007_MBES_EM122_20150207_044356_Supporter_GA4430.all",
-                                "description": "raw data"
+                                "path": "tests/test_data_remote/0243_P007_MBES_EM122_20150207_044356_Supporter_GA4430.all",
+                                "description": "raw data",
+                                "file_type": "Raw Files"
                             }
                         ]
                     }
