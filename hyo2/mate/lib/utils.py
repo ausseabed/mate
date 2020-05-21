@@ -2,12 +2,14 @@ from hyo2.mate.lib.scan import Scan
 from hyo2.mate.lib.scan_check import ScanCheck, FilenameChangedCheck, \
     DateChangedCheck, BathymetryAvailableCheck, BackscatterAvailableCheck, \
     RayTracingCheck, MinimumPingCheck, EllipsoidHeightAvailableCheck, \
-    EllipsoidHeightSetupCheck
+    EllipsoidHeightSetupCheck, TrueheaveExistsCheck, SvpExistsCheck
 from hyo2.mate.lib.scan_ALL import ScanALL
+from hyo2.mate.lib.scan_svp import ScanSvp
+from hyo2.mate.lib.scan_trueheave import ScanTrueheave
 
 
 # List of all check implementations
-all_checks = [
+raw_data_checks = [
     BackscatterAvailableCheck,
     BathymetryAvailableCheck,
     DateChangedCheck,
@@ -18,14 +20,24 @@ all_checks = [
     RayTracingCheck,
 ]
 
+svp_checks = [
+    SvpExistsCheck
+]
 
-def get_scan(path: str, file_type: str) -> Scan:
+trueheave_checks = [
+    TrueheaveExistsCheck
+]
+
+all_checks = raw_data_checks + svp_checks + trueheave_checks
+
+
+def get_scan(path: str, file_extension: str, file_type: str) -> Scan:
     """Factory method to return a new Scan instance for the given file type.
 
     Args:
         path (str): Path to the file that will be read by the `Scan`
-        file_type (str): Type of file to scan. Currently only `all` files are
-            supported.
+        file_extension (str): Extension of file to scan.
+        file_type (str): type of file. eg "Raw Files", "SVP Files"
 
     Returns:
         New `Scan` instance
@@ -33,8 +45,14 @@ def get_scan(path: str, file_type: str) -> Scan:
     Raises:
         NotImplementedError: if `file_type` is not supported
     """
-    if (file_type.lower() == 'all'):
+    if (file_extension.lower() == 'all' and file_type == 'Raw Files'):
         return ScanALL(path)
+    elif (file_type == 'SVP Files'):
+        # could have any extension
+        return ScanSvp(path)
+    elif (file_type == 'Trueheave Files'):
+        # could have any extension
+        return ScanTrueheave(path)
     else:
         raise NotImplementedError(
             "File type {} is not supported".format(file_type))

@@ -280,3 +280,71 @@ class EllipsoidHeightSetupCheck(ScanCheck):
             data=scan_result.data,
             check_state=scan_result.state
         )
+
+
+class SvpExistsCheck(ScanCheck):
+    """ Checks SVP file exists data is available.
+    """
+    id = 'e57b7811-5863-49b3-bd06-a73de0add615'
+    name = "SVP File Available"
+    version = '1'
+
+    def __init__(self, scan: Scan, params):
+        ScanCheck.__init__(self, scan, params)
+
+    def run_check(self):
+        check_state = ScanState.FAIL
+        message = ""
+        if (self.scan.file_exits and self.scan.file_non_zero_size):
+            check_state = ScanState.PASS
+        elif (self.scan.file_exits):
+            # then file exists, but has zero size
+            check_state = ScanState.FAIL
+            message = "SVP file is empty (zero size)"
+        else:
+            check_state = ScanState.FAIL
+            message = "SVP file does not exist"
+
+        self._output = QajsonOutputs(
+            execution=None,
+            files=None,
+            count=None,
+            percentage=None,
+            messages=message,
+            data=None,
+            check_state=check_state
+        )
+
+
+class TrueheaveExistsCheck(ScanCheck):
+    """ Checks Trueheave file exists data is available.
+    """
+    id = '8da36d61-c986-4089-9642-ca2139577fab'
+    name = "Trueheave File Available"
+    version = '1'
+
+    def __init__(self, scan: Scan, params):
+        ScanCheck.__init__(self, scan, params)
+
+    def run_check(self):
+        check_state = ScanState.FAIL
+        message = ""
+        if (self.scan.file_exits and self.scan.file_non_zero_size):
+            check_state = ScanState.PASS
+        elif (self.scan.file_exits):
+            # then file exists, but has zero size
+            check_state = ScanState.FAIL
+            message = "Trueheave file is empty (zero size)"
+        else:
+            check_state = ScanState.FAIL
+            message = "Trueheave file does not exist"
+
+        self._output = QajsonOutputs(
+            execution=None,
+            files=None,
+            count=None,
+            percentage=None,
+            messages=message,
+            data=None,
+            check_state=check_state
+        )

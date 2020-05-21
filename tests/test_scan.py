@@ -2,7 +2,7 @@ import unittest
 import os
 import pytest
 import time
-from hyo2.mate.lib.scan_utils import get_scan
+from hyo2.mate.lib.utils import get_scan
 from hyo2.mate.lib.scan import ScanResult, ScanState
 
 TEST_FILE1 = "0200_MBES_EM122_20150203_010431_Supporter_GA4430.all"
@@ -19,13 +19,13 @@ class TestMateScan(unittest.TestCase):
     def test_get_scan_all(self):
         _, extension = os.path.splitext(self.test_file)
         extension = extension[1:]  # remove the `.` char from extension
-        scan = get_scan(self.test_file, extension)
+        scan = get_scan(self.test_file, extension, 'Raw Files')
         self.assertEqual(type(scan).__name__, 'ScanALL')
 
     def test_get_scan_unsupported(self):
         with pytest.raises(NotImplementedError):
             # following fn should raise a `NotImplementedError` when called
-            get_scan('doesnotexist.something', 'unsupported_type')
+            get_scan('doesnotexist.something', 'unsupported_type', 'foo')
 
 
 class TestMateScanResult(unittest.TestCase):

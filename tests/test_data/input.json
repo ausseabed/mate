@@ -5,6 +5,27 @@
       "checks": [
         {
           "info": {
+            "id": "e57b7811-5863-49b3-bd06-a73de0add615",
+            "name": "SVP File Available",
+            "description": "SVP file exists and is of non zero size",
+            "version": "1",
+            "group": {
+              "id": "123",
+              "name": "123"
+            }
+          },
+          "inputs": {
+            "files": [
+              {
+                "path": "/does/not/exist/asdfs",
+                "description": "raw data",
+                "file_type": "SVP Files"
+              }
+            ]
+          }
+        },
+        {
+          "info": {
             "id": "7761e08b-1380-46fa-a7eb-f1f41db38541",
             "name": "Filename checked",
             "description": "all filename is consistent with that recorded in file metadata",
@@ -17,8 +38,9 @@
           "inputs": {
             "files": [
               {
-                "path": "tests/test_data/0243_P007_MBES_EM122_20150207_044356_Supporter_GA4430.all",
-                "description": "raw data"
+                "path": "tests/test_data_remote/0243_P007_MBES_EM122_20150207_044356_Supporter_GA4430.all",
+                "description": "raw data",
+                "file_type": "Raw Files"
               }
             ]
           }
@@ -37,8 +59,9 @@
           "inputs": {
             "files": [
               {
-                "path": "tests/test_data/0243_P007_MBES_EM122_20150207_044356_Supporter_GA4430.all",
-                "description": "raw data"
+                "path": "tests/test_data_remote/0243_P007_MBES_EM122_20150207_044356_Supporter_GA4430.all",
+                "description": "raw data",
+                "file_type": "Raw Files"
               }
             ]
           }
@@ -57,8 +80,9 @@
           "inputs": {
             "files": [
               {
-                "path": "tests/test_data/0243_P007_MBES_EM122_20150207_044356_Supporter_GA4430.all",
-                "description": "raw data"
+                "path": "tests/test_data_remote/0243_P007_MBES_EM122_20150207_044356_Supporter_GA4430.all",
+                "description": "raw data",
+                "file_type": "Raw Files"
               }
             ]
           }
@@ -77,8 +101,9 @@
           "inputs": {
             "files": [
               {
-                "path": "tests/test_data/0243_P007_MBES_EM122_20150207_044356_Supporter_GA4430.all",
-                "description": "raw data"
+                "path": "tests/test_data_remote/0243_P007_MBES_EM122_20150207_044356_Supporter_GA4430.all",
+                "description": "raw data",
+                "file_type": "Raw Files"
               }
             ]
           }
@@ -97,8 +122,9 @@
           "inputs": {
             "files": [
               {
-                "path": "tests/test_data/0243_P007_MBES_EM122_20150207_044356_Supporter_GA4430.all",
-                "description": "raw data"
+                "path": "tests/test_data_remote/0243_P007_MBES_EM122_20150207_044356_Supporter_GA4430.all",
+                "description": "raw data",
+                "file_type": "Raw Files"
               }
             ]
           }
@@ -117,8 +143,9 @@
           "inputs": {
             "files": [
               {
-                "path": "tests/test_data/0200_MBES_EM122_20150203_010431_Supporter_GA4430.all",
-                "description": "raw data"
+                "path": "tests/test_data_remote/0200_MBES_EM122_20150203_010431_Supporter_GA4430.all",
+                "description": "raw data",
+                "file_type": "Raw Files"
               }
             ]
           },
@@ -140,8 +167,9 @@
           "inputs": {
             "files": [
               {
-                "path": "tests/test_data/0243_P007_MBES_EM122_20150207_044356_Supporter_GA4430.all",
-                "description": "raw data"
+                "path": "tests/test_data_remote/0243_P007_MBES_EM122_20150207_044356_Supporter_GA4430.all",
+                "description": "raw data",
+                "file_type": "Raw Files"
               }
             ]
           }

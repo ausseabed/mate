@@ -8,7 +8,7 @@ from typing import Callable
 from ausseabed.qajson.model import QajsonParam, QajsonOutputs, \
     QajsonExecution, QajsonInputs
 
-from hyo2.mate.lib.scan_utils import get_scan, get_check, is_check_supported
+from hyo2.mate.lib.utils import get_scan, get_check, is_check_supported
 
 logger = logging.getLogger(__name__)
 
@@ -70,14 +70,15 @@ class CheckRunner:
             inputs = check['inputs']
             for input in inputs['files']:
                 filename = input['path']
+                filetype = input['file_type']
 
-                if filename in filechecks:
-                    checklistforfile = filechecks[filename]
+                if (filename, filetype) in filechecks:
+                    checklistforfile = filechecks[(filename, filetype)]
                     checklistforfile.append(check)
                 else:
                     checklistforfile = []
                     checklistforfile.append(check)
-                    filechecks[filename] = checklistforfile
+                    filechecks[(filename, filetype)] = checklistforfile
 
         self._file_checks = filechecks
 
@@ -135,20 +136,26 @@ class CheckRunner:
         # to support accurate progress reporting get size of all files
         total_file_size = 0
         processed_files_size = 0
-        for filename, checklist in self._file_checks.items():
-            total_file_size += os.path.getsize(filename)
+        for (filename, filetype), checklist in self._file_checks.items():
+            if os.path.exists(filename):
+                total_file_size += os.path.getsize(filename)
 
-        for filename, checklist in self._file_checks.items():
+        for (filename, filetype), checklist in self._file_checks.items():
             if self.stopped:
                 return
-            file_size = os.path.getsize(filename)
-            file_size_fraction = file_size / total_file_size
+
+            file_size = 0
+            if os.path.exists(filename):
+                file_size = os.path.getsize(filename)
+            file_size_fraction = 1
+            if total_file_size != 0:
+                file_size_fraction = file_size / total_file_size
             _, extension = os.path.splitext(filename)
             # remove the `.` char from extension
-            filetype = extension[1:]
+            file_extension = extension[1:]
 
             # read metadata from header
-            scan = get_scan(filename, filetype)
+            scan = get_scan(filename, file_extension, filetype)
 
             def prog_cb(scan_progress):
                 p = scan_progress * file_size + processed_files_size

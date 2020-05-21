@@ -5,7 +5,7 @@ import time
 import unittest
 
 from hyo2.mate.lib.check_runner import CheckRunner
-from hyo2.mate.lib.scan_utils import get_scan
+from hyo2.mate.lib.utils import get_scan
 
 qajson = """
 [
@@ -24,11 +24,13 @@ qajson = """
             "files": [
                 {
                     "path": "test/one.all",
-                    "description": "raw input"
+                    "description": "raw input",
+                    "file_type": "Raw Files"
                 },
                 {
                     "path": "test/two.all",
-                    "description": "raw input"
+                    "description": "raw input",
+                    "file_type": "Raw Files"
                 }
             ]
         }
@@ -48,11 +50,13 @@ qajson = """
             "files": [
                 {
                     "path": "test/one.all",
-                    "description": "raw input"
+                    "description": "raw input",
+                    "file_type": "Raw Files"
                 },
                 {
                     "path": "test/three.all",
-                    "description": "raw input"
+                    "description": "raw input",
+                    "file_type": "Raw Files"
                 }
             ]
         }
@@ -73,7 +77,7 @@ class TestMateCheckRunner(unittest.TestCase):
         checkrunner = CheckRunner(self.checks_json)
         checkrunner.initialize()
 
-        file_one_checks = checkrunner._file_checks['test/one.all']
+        file_one_checks = checkrunner._file_checks[('test/one.all', 'Raw Files')]
 
         # make sure the right checks have been grouped under each file
         fn_check = next(
@@ -90,9 +94,9 @@ class TestMateCheckRunner(unittest.TestCase):
         self.assertIsNotNone(fn_check)
         self.assertIsNotNone(dc_check)
 
-        file_two_checks = checkrunner._file_checks['test/two.all']
+        file_two_checks = checkrunner._file_checks[('test/two.all', 'Raw Files')]
         self.assertEqual(len(file_two_checks), 1)
-        file_three_checks = checkrunner._file_checks['test/three.all']
+        file_three_checks = checkrunner._file_checks[('test/three.all', 'Raw Files')]
         self.assertEqual(len(file_three_checks), 1)
 
 

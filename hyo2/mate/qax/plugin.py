@@ -1,7 +1,7 @@
 from typing import List, Dict, NoReturn, Callable
 from pathlib import Path
 
-from hyo2.mate.lib.scan_utils import all_checks
+from hyo2.mate.lib.utils import raw_data_checks, svp_checks, trueheave_checks
 from hyo2.mate.lib.check_runner import CheckRunner
 from hyo2.qax.lib.plugin import QaxCheckToolPlugin, QaxCheckReference, \
     QaxFileType
@@ -11,20 +11,28 @@ from ausseabed.qajson.model import QajsonRoot, QajsonDataLevel, QajsonCheck, \
 
 class MateQaxPlugin(QaxCheckToolPlugin):
 
-    # all Mate checks support the same file types
-    supported_file_types = [
+    # supported raw data file types
+    raw_data_supported_file_types = [
         QaxFileType(
             name="Kongsberg raw sonar files",
             extension="all",
             group="Raw Files",
             icon="kng.png"
-        ),
-        # QaxFileType(
-        #     name="Kongsberg raw sonar files",
-        #     extension="wcd",
-        #     group="Raw Files",
-        #     icon="kng.png"
-        # )
+        )
+    ]
+    svp_supported_file_types = [
+        QaxFileType(
+            name="Sound Velocity Profile files",
+            extension="*",
+            group="SVP Files"
+        )
+    ]
+    trueheave_supported_file_types = [
+        QaxFileType(
+            name="Trueheave files",
+            extension="*",
+            group="Trueheave Files"
+        )
     ]
 
     def __init__(self):
@@ -38,13 +46,38 @@ class MateQaxPlugin(QaxCheckToolPlugin):
     def _build_check_references(self) -> List[QaxCheckReference]:
         data_level = "raw_data"
         check_refs = []
-        for mate_check_class in all_checks:
+
+        # loop through each group of tests, defining the QaxCheckRefs
+        # it's really only the supported_file_types that differ here
+        for mate_check_class in raw_data_checks:
             cr = QaxCheckReference(
                 id=mate_check_class.id,
                 name=mate_check_class.name,
                 data_level=data_level,
                 description=None,
-                supported_file_types=MateQaxPlugin.supported_file_types,
+                supported_file_types=MateQaxPlugin.raw_data_supported_file_types,
+                default_input_params=mate_check_class.default_params,
+                version=mate_check_class.version,
+            )
+            check_refs.append(cr)
+        for mate_check_class in svp_checks:
+            cr = QaxCheckReference(
+                id=mate_check_class.id,
+                name=mate_check_class.name,
+                data_level=data_level,
+                description=None,
+                supported_file_types=MateQaxPlugin.svp_supported_file_types,
+                default_input_params=mate_check_class.default_params,
+                version=mate_check_class.version,
+            )
+            check_refs.append(cr)
+        for mate_check_class in trueheave_checks:
+            cr = QaxCheckReference(
+                id=mate_check_class.id,
+                name=mate_check_class.name,
+                data_level=data_level,
+                description=None,
+                supported_file_types=MateQaxPlugin.trueheave_supported_file_types,
                 default_input_params=mate_check_class.default_params,
                 version=mate_check_class.version,
             )
@@ -159,14 +192,20 @@ class MateQaxPlugin(QaxCheckToolPlugin):
                 dl_sp = getattr(qa_json.qa, dl)
                 dl_sp.checks.remove(mate_check)
 
-        for input_file in files:
+        for (input_file, input_file_group) in files:
+            print("update_qa_json_input_files {}   {}".format(input_file, input_file_group))
             for mate_check in all_mate_checks:
                 check_ref = self.get_check_reference(mate_check.info.id)
-                if not check_ref.supports_file(input_file):
+                if not check_ref.supports_file(input_file, input_file_group):
                     continue
                 mate_check_clone = QajsonCheck.from_dict(mate_check.to_dict())
                 inputs = mate_check_clone.get_or_add_inputs()
                 inputs.files.append(
-                    QajsonFile(path=str(input_file), description=None))
+                    QajsonFile(
+                        path=str(input_file),
+                        file_type=input_file_group,
+                        description=None
+                    )
+                )
                 # ** ASSUME ** mate checks only go in the raw_data data level
                 qa_json.qa.raw_data.checks.append(mate_check_clone)
