@@ -527,7 +527,7 @@ class ScanALL(Scan):
                 data={})
         
         inputtelegramsize = self.datagrams['n'][0].Attitude[0][6]
-        rawposinput = self.datagrams['P'][0].data[2:5]
+        rawposinput = self.datagrams['P'][0].data[2:5].decode("utf-8")
         if inputtelegramsize == 137:
             inertialSystem = 'PosMV'
         elif inputtelegramsize == 45 or inputtelegramsize == 43:
@@ -537,10 +537,11 @@ class ScanALL(Scan):
 
         data = {
             'inertial_pos_system': inertialSystem,
-            'pos_string': rawposinput.decode("utf-8")
+            'pos_string': rawposinput
         }
 
-        if inertialSystem == 'PosMV' or inertialSystem == 'F180' and rawposinput == 'GGK':
+        if inertialSystem == 'PosMV' and rawposinput == 'GGK' or \
+                inertialSystem == 'F180' and rawposinput == 'GGK':
             return ScanResult(
                 state=ScanState.PASS,
                 messages='',
