@@ -173,6 +173,27 @@
               }
             ]
           }
+        },
+        {
+          "info": {
+            "id": "c1b857dd-6cb0-418c-a286-0dbcae9827b8",
+            "name": "Runtime Parameters",
+            "description": "",
+            "version": "1",
+            "group": {
+              "id": "123",
+              "name": "123"
+            }
+          },
+          "inputs": {
+            "files": [
+              {
+                "path": "tests/test_data_remote/0243_P007_MBES_EM122_20150207_044356_Supporter_GA4430.all",
+                "description": "raw data",
+                "file_type": "Raw Files"
+              }
+            ]
+          }
         }
       ]
     },

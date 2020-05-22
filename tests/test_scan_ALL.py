@@ -79,6 +79,17 @@ class TestMateScanALL(unittest.TestCase):
         inst_params = self.test.get_installation_parameters()
         self.assertIsInstance(inst_params, dict)
 
+    def test_runtime_parameters(self):
+        rt_params = self.test.runtime_parameters()
+        self.assertEqual(
+            rt_params.state,
+            scan.ScanState.PASS
+        )
+        self.assertEqual(
+            len(rt_params.data['runtime_parameters']),
+            3
+        )
+
 
 def suite():
     s = unittest.TestSuite()

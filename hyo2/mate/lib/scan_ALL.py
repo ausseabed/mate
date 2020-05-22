@@ -1,6 +1,7 @@
 from collections import namedtuple
 from copy import copy
 from datetime import *
+from typing import List, Dict
 import functools
 import os
 import struct
@@ -86,9 +87,9 @@ class ScanALL(Scan):
             header = self.all_reader.readDatagramHeader()
             num_bytes, stx, dg_type, em_model, record_date, record_time, \
                 counter, serial_number = header
-                
+
             time_stamp = pyall.to_DateTime(record_date, record_time)
-            
+
             dg_type, datagram = self.all_reader.readDatagram()
 
             if dg_type not in self.scan_result.keys():
@@ -525,7 +526,7 @@ class ScanALL(Scan):
                 state=ScanState.WARNING,
                 messages="Unable to conduct height setup check.  No network attitude and velocity datagrams",
                 data={})
-        
+
         inputtelegramsize = self.datagrams['n'][0].Attitude[0][6]
         rawposinput = self.datagrams['P'][0].data[2:5].decode("utf-8")
         if inputtelegramsize == 137:
@@ -559,3 +560,63 @@ class ScanALL(Scan):
                 messages="Ellipsoid heights not being logged change your position input to a GGK string",
                 data=data
             )
+
+    def __dg_to_dict(self, datagram) -> Dict:
+        '''
+        Utils function to convert a datagram into a python
+        dict that can be serialised. The assumption is that all attributes
+        not starting with "__" are json serialisable and this may not be
+        the case.
+        '''
+        # ignore the following attributes. They are either unecessary or
+        # are know to not be json serialisable.
+        ignore_attrs = {
+            'offset',
+            'fileptr',
+            'data',
+            'typeOfDatagram',
+            'numberOfBytes',
+            'header',
+            'parameters',
+            'read',
+        }
+        dg_dict = {}
+        # get a list of all the attributes
+        attrs = [
+            a
+            for a in dir(datagram)
+            if not (a.startswith('__') or a in ignore_attrs)
+        ]
+        print(attrs)
+        # loop through each attribute and add it to the dict
+        for attr in attrs:
+            value = getattr(datagram, attr)
+            print("{}  {}".format(attr, type(value).__name__))
+            dg_dict[attr] = value
+        return dg_dict
+
+    def runtime_parameters(self) -> ScanResult:
+        '''
+        Extracts runtime parameters and included them in the `data` dict.
+        '''
+
+        if 'R' not in self.datagrams:
+            return ScanResult(
+                state=ScanState.WARNING,
+                messages="Runtime parameters datagram (R) not found in file",
+                data={})
+
+        r_datagrams = self.datagrams['R']
+        runtime_parameters = []
+        for r_datagram in r_datagrams:
+            dg_dict = self.__dg_to_dict(r_datagram)
+            runtime_parameters.append(dg_dict)
+
+        return ScanResult(
+            state=ScanState.PASS,
+            messages=(
+                "{} Runtime parameter (R) datagrams found in file"
+                .format(len(runtime_parameters))
+            ),
+            data={'runtime_parameters': runtime_parameters}
+        )

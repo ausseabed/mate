@@ -348,3 +348,28 @@ class TrueheaveExistsCheck(ScanCheck):
             data=None,
             check_state=check_state
         )
+
+
+class RuntimeParametersCheck(ScanCheck):
+    '''
+    Check for and extract runtime parameter datagrams
+    '''
+    id = 'c1b857dd-6cb0-418c-a286-0dbcae9827b8'
+    name = "Runtime Parameters"
+    version = '1'
+
+    def __init__(self, scan: Scan, params):
+        ScanCheck.__init__(self, scan, params)
+
+    def run_check(self):
+        scan_result = self.scan.runtime_parameters()
+
+        self._output = QajsonOutputs(
+            execution=None,
+            files=None,
+            count=None,
+            percentage=None,
+            messages=scan_result.messages,
+            data=scan_result.data,
+            check_state=scan_result.state
+        )
