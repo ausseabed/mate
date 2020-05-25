@@ -53,6 +53,7 @@ setup(
     ],
     install_requires=[
         "ausseabed.qajson",
+        "geojson",
     ],
     python_requires='>=3.6',
     entry_points={

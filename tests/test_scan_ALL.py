@@ -1,6 +1,7 @@
 import unittest
 import os
 import time
+from collections import namedtuple
 from hyo2.mate.lib.scan_ALL import ScanALL
 from hyo2.mate.lib import scan
 
@@ -88,6 +89,63 @@ class TestMateScanALL(unittest.TestCase):
         self.assertEqual(
             len(rt_params.data['runtime_parameters']),
             3
+        )
+
+    def test_merge_positions(self):
+        Position = namedtuple('Position', 'Latitude Longitude Time')
+        positions = [
+            Position(0.0, 0.0, 1000.0),
+            Position(0.0, 1.0, 1001.0),
+            Position(0.0, 2.0, 1002.0),
+            Position(0.0, 3.0, 1003.0),
+            Position(0.0, 4.0, 1004.0),
+            Position(0.0, 5.0, 1005.0),
+            Position(0.0, 6.0, 1006.0),
+            Position(0.0, 7.0, 1007.0),
+            Position(0.0, 8.0, 1008.0),
+            Position(0.0, 9.0, 1009.0),
+            Position(0.0, 10.0, 1010.0),
+            Position(0.0, 11.0, 1011.0),
+            Position(0.0, 12.0, 1012.0),
+            Position(0.0, 13.0, 1013.0),
+            Position(0.0, 14.0, 1014.0),
+            Position(0.0, 15.0, 1015.0),
+            Position(0.0, 16.0, 1016.0),
+            Position(0.0, 17.0, 1017.0),
+            Position(0.0, 18.0, 1018.0),
+            Position(0.0, 19.0, 1019.0),
+            Position(0.0, 20.0, 1020.0),
+        ]
+
+        to_merge = [
+            {'v': 'a', 'Time': 900},
+            {'v': 'b', 'Time': 1003},
+            {'v': 'c', 'Time': 1008.5},
+            {'v': 'd', 'Time': 1017},
+            {'v': 'e', 'Time': 1021},
+        ]
+
+        self.test._merge_position(positions, to_merge)
+
+        self.assertEqual(
+            to_merge[0]["Longitude"],
+            0.0
+        )
+        self.assertEqual(
+            to_merge[1]["Longitude"],
+            3.0
+        )
+        self.assertEqual(
+            to_merge[2]["Longitude"],
+            8.0
+        )
+        self.assertEqual(
+            to_merge[3]["Longitude"],
+            17.0
+        )
+        self.assertEqual(
+            to_merge[4]["Longitude"],
+            20.0
         )
 
 

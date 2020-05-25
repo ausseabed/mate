@@ -193,7 +193,6 @@ class MateQaxPlugin(QaxCheckToolPlugin):
                 dl_sp.checks.remove(mate_check)
 
         for (input_file, input_file_group) in files:
-            print("update_qa_json_input_files {}   {}".format(input_file, input_file_group))
             for mate_check in all_mate_checks:
                 check_ref = self.get_check_reference(mate_check.info.id)
                 if not check_ref.supports_file(input_file, input_file_group):

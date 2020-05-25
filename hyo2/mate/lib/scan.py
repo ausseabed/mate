@@ -1,5 +1,7 @@
 from datetime import datetime
 from enum import Enum
+from geojson import Feature, Point, FeatureCollection
+from geojson.mapping import to_mapping
 from typing import Optional, Dict, List, Any, Union
 import os
 
@@ -113,3 +115,23 @@ class Scan:
     def is_size_matched(self):
         '''check if number of bytes of all datagrams is equal to file size'''
         return (self.total_datagram_bytes() == self.file_size)
+
+    def _to_points_geojson(self, items):
+        '''
+        Converts a list of dicts, where each dict contains a Latitude and
+        Longitude into a geojson object
+        '''
+
+        features = []
+        for item in items:
+            pt = Point([item["Longitude"], item["Latitude"]])
+            # remove the lat/lng otherwise it will be included in the geom
+            # definition AND the properties for this point
+            item_clone = item.copy()
+            del item_clone["Longitude"]
+            del item_clone["Latitude"]
+            feature = Feature(geometry=pt, properties=item_clone)
+            features.append(feature)
+
+        fc = FeatureCollection(features)
+        return to_mapping(fc)

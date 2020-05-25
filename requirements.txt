@@ -1,5 +1,6 @@
 coveralls
 jsonschema
+geojson
 pytest
 pytest-cov
 git+git://github.com/ausseabed/qajson.git@master#egg=ausseabed.qajson

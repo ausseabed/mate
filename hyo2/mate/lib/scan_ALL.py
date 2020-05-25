@@ -587,13 +587,40 @@ class ScanALL(Scan):
             for a in dir(datagram)
             if not (a.startswith('__') or a in ignore_attrs)
         ]
-        print(attrs)
         # loop through each attribute and add it to the dict
         for attr in attrs:
             value = getattr(datagram, attr)
-            print("{}  {}".format(attr, type(value).__name__))
             dg_dict[attr] = value
         return dg_dict
+
+    def _merge_position(self, positions: List, to_merge_list: List):
+        '''
+        Adds position (Latitude and Longitude) to the `to_merge` list based
+        on the timestamps included in both `positions` and `to_merge`
+
+        :param position: List of position datagrams from where the Latitude
+            and Longitude will be extracted
+        :param to_merge_lisr: List of dictionaries that will have the Latitude
+            and Longitude added.
+        '''
+        # to keep this code efficient we assume the position datagrams
+        # are ordered according to time. We match a position datagram
+        # with a runtime params datagram by using the position before the
+        # runtime params datagram.
+        position_iterator = iter(positions)
+        position = next(position_iterator)
+        position_prev = position
+        for to_merge_item in to_merge_list:
+            tmi_time = to_merge_item["Time"]
+            while position is not None and position.Time <= tmi_time:
+                position_prev = position
+                try:
+                    position = next(position_iterator)
+                except StopIteration:
+                    break
+
+            to_merge_item["Latitude"] = position_prev.Latitude
+            to_merge_item["Longitude"] = position_prev.Longitude
 
     def runtime_parameters(self) -> ScanResult:
         '''
@@ -612,11 +639,21 @@ class ScanALL(Scan):
             dg_dict = self.__dg_to_dict(r_datagram)
             runtime_parameters.append(dg_dict)
 
+        data = {'runtime_parameters': runtime_parameters}
+
+        if 'P' in self.datagrams:
+            # then we can build a point based dataset of where the parameters
+            # changed
+            position_datagrams = self.datagrams['P']
+            self._merge_position(position_datagrams, runtime_parameters)
+            map = self._to_points_geojson(runtime_parameters)
+            data['map'] = map
+
         return ScanResult(
             state=ScanState.PASS,
             messages=(
                 "{} Runtime parameter (R) datagrams found in file"
                 .format(len(runtime_parameters))
             ),
-            data={'runtime_parameters': runtime_parameters}
+            data=data
         )
