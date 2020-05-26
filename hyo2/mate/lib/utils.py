@@ -16,6 +16,7 @@ raw_data_checks = [
     MinimumPingCheck,
     RayTracingCheck,
     RuntimeParametersCheck,
+    PositionsCheck,
 ]
 
 svp_checks = [

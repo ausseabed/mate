@@ -1,6 +1,8 @@
 from collections import namedtuple
 from copy import copy
 from datetime import *
+from geojson import Feature, Point, FeatureCollection, LineString
+from geojson.mapping import to_mapping
 from typing import List, Dict
 import functools
 import os
@@ -655,5 +657,40 @@ class ScanALL(Scan):
                 "{} Runtime parameter (R) datagrams found in file"
                 .format(len(runtime_parameters))
             ),
+            data=data
+        )
+
+    def positions(self) -> ScanResult:
+        '''
+        Extracts positions from position datagram. Scan result includes
+        geojson line definition comprised of these unique positions.
+        '''
+
+        if 'P' not in self.datagrams:
+            return ScanResult(
+                state=ScanState.WARNING,
+                messages="Posistion datagram (P) not found in file",
+                data={})
+
+        p_datagrams = self.datagrams['P']
+        position_points = []
+        last_point = None
+        for p_datagram in p_datagrams:
+            pt = Point([p_datagram.Longitude, p_datagram.Latitude])
+            if (last_point is not None and
+                    pt.coordinates[0] == last_point.coordinates[0] and
+                    pt.coordinates[1] == last_point.coordinates[1]):
+                # skip any points that have the same location
+                continue
+            position_points.append(pt)
+            last_point = pt
+        line = LineString(position_points)
+        feature = Feature(geometry=line)
+        feature_collection = FeatureCollection([feature])
+        data = {'map': to_mapping(feature_collection)}
+
+        return ScanResult(
+            state=ScanState.PASS,
+            messages=[],
             data=data
         )

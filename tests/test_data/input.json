@@ -194,6 +194,27 @@
               }
             ]
           }
+        },
+        {
+          "info": {
+            "id": "9efe60b6-47d1-4631-8d4c-dc1ce89dbaa6",
+            "name": "Positions",
+            "description": "",
+            "version": "1",
+            "group": {
+              "id": "123",
+              "name": "123"
+            }
+          },
+          "inputs": {
+            "files": [
+              {
+                "path": "tests/test_data_remote/0243_P007_MBES_EM122_20150207_044356_Supporter_GA4430.all",
+                "description": "raw data",
+                "file_type": "Raw Files"
+              }
+            ]
+          }
         }
       ]
     },

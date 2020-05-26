@@ -373,3 +373,28 @@ class RuntimeParametersCheck(ScanCheck):
             data=scan_result.data,
             check_state=scan_result.state
         )
+
+
+class PositionsCheck(ScanCheck):
+    '''
+    Extracts positions
+    '''
+    id = '9efe60b6-47d1-4631-8d4c-dc1ce89dbaa6'
+    name = "Positions"
+    version = '1'
+
+    def __init__(self, scan: Scan, params):
+        ScanCheck.__init__(self, scan, params)
+
+    def run_check(self):
+        scan_result = self.scan.positions()
+
+        self._output = QajsonOutputs(
+            execution=None,
+            files=None,
+            count=None,
+            percentage=None,
+            messages=scan_result.messages,
+            data=scan_result.data,
+            check_state=scan_result.state
+        )
