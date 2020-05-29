@@ -310,7 +310,7 @@ class SvpExistsCheck(ScanCheck):
             files=None,
             count=None,
             percentage=None,
-            messages=message,
+            messages=[message],
             data=None,
             check_state=check_state
         )
@@ -344,7 +344,7 @@ class TrueheaveExistsCheck(ScanCheck):
             files=None,
             count=None,
             percentage=None,
-            messages=message,
+            messages=[message],
             data=None,
             check_state=check_state
         )
