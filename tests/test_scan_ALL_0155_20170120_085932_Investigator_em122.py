@@ -100,8 +100,11 @@ class TestMateScanALL(unittest.TestCase):
             scan.ScanState.PASS
         )
 
-    def test_is_date_match(self):
-        self.assertTrue(self.test.is_date_match())
+    def test_date_match(self):
+        self.assertEqual(
+            self.test.date_match().state,
+            scan.ScanState.PASS
+        )
 
     def test_bathymetry_availability(self):
         bathy_available_res = self.test.bathymetry_availability()

@@ -244,17 +244,42 @@ class ScanALL(Scan):
             data={'found_filenames': found_filenames}
         )
 
-    def is_date_match(self):
+    def date_match(self):
         '''
         compare the date as in the datagram I and the date as written
         in the filename recorded in the datagram I
         return: True/False
         '''
         dt = 'unknown'
-        rec = self.get_datagram_info('I')
-        if rec is not None:
-            dt = rec['startTime'].strftime('%Y%m%d')
-        return dt in os.path.basename(self.file_path)
+
+        if 'I' not in self.datagrams:
+            # then there's no way to check, so fail test
+            return ScanResult(
+                state=ScanState.FAIL,
+                messages=[
+                    "'I' datagram not found, cannot extract startTime"]
+            )
+
+        base_fn = os.path.basename(self.file_path)
+
+        installationParametersDatagrams = self.datagrams['I']
+        # assume we just use the first one we find
+        rec = installationParametersDatagrams[0]
+
+        found = str(rec.RecordDate) in base_fn
+
+        if found:
+            return ScanResult(state=ScanState.PASS)
+        else:
+            msg = (
+                "Could not find record date {} in filename"
+                .format(rec.RecordDate)
+            )
+            return ScanResult(
+                state=ScanState.FAIL,
+                messages=[msg],
+                data={'found_filenames': found_filenames}
+            )
 
     def bathymetry_availability(self) -> ScanResult:
         '''

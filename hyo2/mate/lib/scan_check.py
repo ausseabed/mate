@@ -79,23 +79,16 @@ class DateChangedCheck(ScanCheck):
         ScanCheck.__init__(self, scan, params)
 
     def run_check(self):
-        date_changed = not self.scan.is_date_match()
-
-        messages = (
-            ["File date does not match date embedded within file contents"]
-            if date_changed
-            else None
-        )
-
-        state = ScanState.FAIL if date_changed else ScanState.PASS
+        scan_result = self.scan.date_match()
 
         self._output = QajsonOutputs(
             execution=None,
             files=None,
             count=None,
             percentage=None,
-            messages=messages,
-            check_state=state
+            messages=scan_result.messages,
+            data=scan_result.data,
+            check_state=scan_result.state
         )
 
 
