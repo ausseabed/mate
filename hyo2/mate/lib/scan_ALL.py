@@ -200,15 +200,22 @@ class ScanALL(Scan):
             dsv = rec['DSV']
         return dsv
 
-    def is_filename_changed(self):
+    def filename_changed(self):
         '''
         check if the filename is different from what recorded
         in the datagram. Requires `I` datagram
         '''
         if 'I' not in self.datagrams:
             # then there's no way to check, so fail test
-            return False
+            return ScanResult(
+                state=ScanState.FAIL,
+                messages=[
+                    "'I' datagram not found, cannot extract original filename"]
+            )
 
+        base_fn = os.path.basename(self.file_path)
+
+        found_filenames = []
         installationParametersDatagrams = self.datagrams['I']
         for installationParametersDatagram in installationParametersDatagrams:
 
@@ -217,13 +224,25 @@ class ScanALL(Scan):
                 continue
 
             rfn = installationParametersDatagram.installationParameters['RFN']
-            matched = os.path.basename(self.file_path) != rfn
+            found_filenames.append(rfn)
+
+            matched = base_fn == rfn
             if matched:
-                return True
+                return ScanResult(state=ScanState.PASS)
+
+        msg = (
+            "Filename {} did not match any filenames specified within the "
+            "installation parameters (I) datagram. The following were found; "
+            "{}".format(base_fn, ', '.join(found_filenames))
+        )
 
         # then none of the installation parameter datagrams included the
         # filename that this data has been loaded from.
-        return False
+        return ScanResult(
+            state=ScanState.FAIL,
+            messages=[msg],
+            data={'found_filenames': found_filenames}
+        )
 
     def is_date_match(self):
         '''

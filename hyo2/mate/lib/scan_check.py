@@ -54,23 +54,16 @@ class FilenameChangedCheck(ScanCheck):
         ScanCheck.__init__(self, scan, params)
 
     def run_check(self):
-        filename_changed = self.scan.is_filename_changed()
-
-        messages = (
-            ["Filename does not match name embedded within file contents"]
-            if filename_changed
-            else None
-        )
-
-        state = ScanState.FAIL if filename_changed else ScanState.PASS
+        scan_result = self.scan.filename_changed()
 
         self._output = QajsonOutputs(
             execution=None,
             files=None,
             count=None,
             percentage=None,
-            messages=messages,
-            check_state=state
+            messages=scan_result.messages,
+            data=scan_result.data,
+            check_state=scan_result.state
         )
 
 

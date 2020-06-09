@@ -94,8 +94,11 @@ class TestMateScanALL(unittest.TestCase):
     def test_is_size_matched(self):
         self.assertTrue(self.test.is_size_matched())
 
-    def test_is_filename_changed(self):
-        self.assertFalse(self.test.is_filename_changed())
+    def test_filename_changed(self):
+        self.assertEqual(
+            self.test.filename_changed().state,
+            scan.ScanState.PASS
+        )
 
     def test_is_date_match(self):
         self.assertTrue(self.test.is_date_match())
