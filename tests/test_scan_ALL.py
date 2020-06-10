@@ -95,10 +95,6 @@ class TestMateScanALL(unittest.TestCase):
             rt_params.state,
             scan.ScanState.PASS
         )
-        self.assertEqual(
-            len(rt_params.data['runtime_parameters']),
-            3
-        )
 
     def test_merge_positions(self):
         Position = namedtuple('Position', 'Latitude Longitude Time')
