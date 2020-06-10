@@ -18,6 +18,12 @@ class MateQaxPlugin(QaxCheckToolPlugin):
             extension="all",
             group="Raw Files",
             icon="kng.png"
+        ),
+        QaxFileType(
+            name="Generic Sensor Format files",
+            extension="gsf",
+            group="Raw Files",
+            icon="gsf.png"
         )
     ]
     svp_supported_file_types = [

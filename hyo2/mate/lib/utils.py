@@ -1,6 +1,7 @@
 from hyo2.mate.lib.scan import Scan
 from hyo2.mate.lib.scan_check import *
 from hyo2.mate.lib.scan_ALL import ScanALL
+from hyo2.mate.lib.scan_gsf import ScanGsf
 from hyo2.mate.lib.scan_svp import ScanSvp
 from hyo2.mate.lib.scan_trueheave import ScanTrueheave
 
@@ -46,6 +47,8 @@ def get_scan(path: str, file_extension: str, file_type: str) -> Scan:
     """
     if (file_extension.lower() == 'all' and file_type == 'Raw Files'):
         return ScanALL(path)
+    elif (file_extension.lower() == 'gsf' and file_type == 'Raw Files'):
+        return ScanGsf(path)
     elif (file_type == 'SVP Files'):
         # could have any extension
         return ScanSvp(path)
