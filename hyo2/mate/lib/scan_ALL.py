@@ -200,7 +200,7 @@ class ScanALL(Scan):
             dsv = rec['DSV']
         return dsv
 
-    def filename_changed(self):
+    def filename_changed(self) -> ScanResult:
         '''
         check if the filename is different from what recorded
         in the datagram. Requires `I` datagram
@@ -244,7 +244,7 @@ class ScanALL(Scan):
             data={'found_filenames': found_filenames}
         )
 
-    def date_match(self):
+    def date_match(self) -> ScanResult:
         '''
         compare the date as in the datagram I and the date as written
         in the filename recorded in the datagram I
@@ -535,7 +535,7 @@ class ScanALL(Scan):
                     return False
         return True
 
-    def ellipsoid_height_availability(self):
+    def ellipsoid_height_availability(self) -> ScanResult:
         '''
         check the presence of the datagrams h and the height type is 0 (The
         height is derived from the GGK or GGA datagram and is the height of
@@ -547,13 +547,28 @@ class ScanALL(Scan):
 
         if 'h' not in self.datagrams:
             # then there's no way to check, so fail test
-            return False
+            return ScanResult(
+                state=ScanState.FAIL,
+                messages=["'h' datagram not found"]
+            )
 
-        heightDatagrams = self.datagrams['h']
-        firstHeightDatagram = heightDatagrams[0]
-        return firstHeightDatagram.HeightType == 0
+        height_datagrams = self.datagrams['h']
+        first_height_datagram = height_datagrams[0]
+        if first_height_datagram.HeightType == 0:
+            return ScanResult(
+                state=ScanState.PASS
+            )
+        else:
+            return ScanResult(
+                state=ScanState.FAIL,
+                messages=[(
+                    "Height 'h' datagram was included but HeightType did not "
+                    "match expected value of 0 (found {})"
+                    .format(first_height_datagram.HeightType)
+                )]
+            )
 
-    def ellipsoid_height_setup(self)  -> ScanResult:
+    def ellipsoid_height_setup(self) -> ScanResult:
         '''
         check the input positioning system string will likely contain heights
         that are referenced to the ellipsoid and provide feedback that suggests

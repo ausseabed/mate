@@ -222,23 +222,16 @@ class EllipsoidHeightAvailableCheck(ScanCheck):
         ScanCheck.__init__(self, scan, params)
 
     def run_check(self):
-        eh_avail = self.scan.ellipsoid_height_availability()
-
-        messages = (
-            None
-            if rt_avail
-            else ["Ellipsoid height is not available"]
-        )
-
-        state = ScanState.PASS if eh_avail else ScanState.FAIL
+        scan_result = self.scan.ellipsoid_height_availability()
 
         self._output = QajsonOutputs(
             execution=None,
             files=None,
             count=None,
             percentage=None,
-            messages=messages,
-            check_state=state
+            messages=scan_result.messages,
+            data=scan_result.data,
+            check_state=scan_result.state
         )
 
 
