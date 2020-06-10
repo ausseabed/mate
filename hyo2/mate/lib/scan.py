@@ -71,6 +71,24 @@ class Scan:
         return datetime.utcfromtimestamp(unix_time)\
             .isoformat(timespec='milliseconds')
 
+    def _push_datagram(self, datagram_char, datagram):
+        '''
+        util function to cut boiler plate code on adding to the datagrams dict
+        :param datagram_char: The single character identifier for this
+            datagram. eg; `I`, `h`
+        :param datagram: The datagram object
+        '''
+
+        # Use the datagram id character as the key to store values in the
+        # cache dict. Most users/developers are familiar with this
+        name = datagram_char
+
+        # keep a list of datagrams in the datagram dict. If one hasn't been
+        # added with this name yet create a new array
+        if name not in self.datagrams:
+            self.datagrams[name] = []
+        self.datagrams[name].append(datagram)
+
     def scan_datagram(self):
         '''
         scan data to extract basic information for each type of datagram

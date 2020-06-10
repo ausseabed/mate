@@ -1,3 +1,5 @@
+from geojson import Feature, Point, FeatureCollection, LineString
+from geojson.mapping import to_mapping
 import pygsf
 
 from hyo2.mate.lib.scan import Scan
@@ -29,7 +31,10 @@ class ScanGsf(Scan):
 
             if record_identifier == pygsf.PROCESSING_PARAMETERS:
                 datagram.read()
-                print(datagram.installationParameters)
+                self._push_datagram(record_identifier, datagram)
+            elif record_identifier == pygsf.SWATH_BATHYMETRY:
+                datagram.read(headeronly=True)
+                self._push_datagram(record_identifier, datagram)
 
     def filename_changed(self) -> ScanResult:
         return ScanResult(
@@ -83,7 +88,35 @@ class ScanGsf(Scan):
         )
 
     def positions(self) -> ScanResult:
+        if pygsf.SWATH_BATHYMETRY not in self.datagrams:
+            msg = (
+                "Swath bathymetry datagram (record id {}) not found in file. "
+                "Unable to extract position data"
+                .format(pygsf.SWATH_BATHYMETRY)
+            )
+            return ScanResult(
+                state=ScanState.WARNING,
+                messages=msg)
+
+        p_datagrams = self.datagrams[pygsf.SWATH_BATHYMETRY]
+        position_points = []
+        last_point = None
+        for p_datagram in p_datagrams:
+            pt = Point([p_datagram.longitude, p_datagram.latitude])
+            if (last_point is not None and
+                    pt.coordinates[0] == last_point.coordinates[0] and
+                    pt.coordinates[1] == last_point.coordinates[1]):
+                # skip any points that have the same location
+                continue
+            position_points.append(pt)
+            last_point = pt
+        line = LineString(position_points)
+        feature = Feature(geometry=line)
+        feature_collection = FeatureCollection([feature])
+        data = {'map': to_mapping(feature_collection)}
+
         return ScanResult(
-            state=ScanState.WARNING,
-            messages=["Check not implemented for GSF format"]
+            state=ScanState.PASS,
+            messages=[],
+            data=data
         )

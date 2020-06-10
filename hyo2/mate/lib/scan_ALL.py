@@ -54,24 +54,6 @@ class ScanALL(Scan):
                 return None
         return c_bytes
 
-    def __push_datagram(self, datagram_char, datagram):
-        '''
-        util function to cut boiler plate code on adding to the datagrams dict
-        :param datagram_char: The single character identifier for this
-            datagram. eg; `I`, `h`
-        :param datagram: The datagram object
-        '''
-
-        # Use the datagram id character as the key to store values in the
-        # cache dict. Most users/developers are familiar with this
-        name = datagram_char
-
-        # keep a list of datagrams in the datagram dict. If one hasn't been
-        # added with this name yet create a new array
-        if name not in self.datagrams:
-            self.datagrams[name] = []
-        self.datagrams[name].append(datagram)
-
     def scan_datagram(self, progress_callback=None):
         '''scan data to extract basic information for each type of datagram'''
 
@@ -109,7 +91,7 @@ class ScanALL(Scan):
                 # Instrument parameters
                 # we care about this datagram so read its contents
                 datagram.read()
-                self.__push_datagram(dg_type, datagram)
+                self._push_datagram(dg_type, datagram)
             elif dg_type == 'h':
                 # height
                 if 'h' not in self.datagrams:
@@ -117,47 +99,47 @@ class ScanALL(Scan):
                     # to check the height type (assuming all h datagrams)
                     # share the same type
                     datagram.read()
-                    self.__push_datagram(dg_type, datagram)
+                    self._push_datagram(dg_type, datagram)
             elif dg_type == 'R':
                 datagram.read()
-                self.__push_datagram(dg_type, datagram)
+                self._push_datagram(dg_type, datagram)
             elif dg_type == 'A':
                 datagram.read()
-                self.__push_datagram(dg_type, datagram)
+                self._push_datagram(dg_type, datagram)
             elif dg_type == 'n':
                 datagram.read()
-                self.__push_datagram(dg_type, datagram)
+                self._push_datagram(dg_type, datagram)
             elif dg_type == 'P':
                 datagram.read()
-                self.__push_datagram(dg_type, datagram)
+                self._push_datagram(dg_type, datagram)
             elif dg_type == 'G':
                 # problem
                 datagram.read()
-                self.__push_datagram(dg_type, datagram)
+                self._push_datagram(dg_type, datagram)
             elif dg_type == 'U':
                 datagram.read()
-                self.__push_datagram(dg_type, datagram)
+                self._push_datagram(dg_type, datagram)
             elif dg_type == 'D':
                 datagram.read()
-                self.__push_datagram(dg_type, datagram)
+                self._push_datagram(dg_type, datagram)
             elif dg_type == 'X':
                 datagram.read()
-                self.__push_datagram(dg_type, datagram)
+                self._push_datagram(dg_type, datagram)
             elif dg_type == 'F':
                 datagram.read()
-                self.__push_datagram(dg_type, datagram)
+                self._push_datagram(dg_type, datagram)
             elif dg_type == 'f':
                 datagram.read()
-                self.__push_datagram(dg_type, datagram)
+                self._push_datagram(dg_type, datagram)
             elif dg_type == 'N':
                 datagram.read()
-                self.__push_datagram(dg_type, datagram)
+                self._push_datagram(dg_type, datagram)
             elif dg_type == 'S':
                 datagram.read()
-                self.__push_datagram(dg_type, datagram)
+                self._push_datagram(dg_type, datagram)
             elif dg_type == 'Y':
                 datagram.read()
-                self.__push_datagram(dg_type, datagram)
+                self._push_datagram(dg_type, datagram)
 
             if dg_type in ['D', 'X', 'F', 'f', 'N', 'S', 'Y']:
                 this_count = counter
@@ -700,7 +682,7 @@ class ScanALL(Scan):
             dg_dict = self.__dg_to_dict(r_datagram)
             runtime_parameters.append(dg_dict)
 
-        data = {'runtime_parameters': runtime_parameters}
+        data = {}
 
         if 'P' in self.datagrams:
             # then we can build a point based dataset of where the parameters
