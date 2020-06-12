@@ -79,10 +79,16 @@ class ScanGsf(Scan):
             )
 
     def bathymetry_availability(self) -> ScanResult:
-        return ScanResult(
-            state=ScanState.WARNING,
-            messages=["Check not implemented for GSF format"]
-        )
+        if pygsf.SWATH_BATHYMETRY not in self.datagrams:
+            msg = (
+                "Swath bathymetry datagram (record id {}) not found in file."
+                .format(pygsf.SWATH_BATHYMETRY)
+            )
+            return ScanResult(
+                state=ScanState.WARNING,
+                messages=msg)
+        else:
+            return ScanResult(state=ScanState.PASS)
 
     def backscatter_availability(self) -> ScanResult:
         return ScanResult(
