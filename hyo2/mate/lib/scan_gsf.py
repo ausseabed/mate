@@ -1,5 +1,6 @@
 from geojson import Feature, Point, FeatureCollection, LineString
 from geojson.mapping import to_mapping
+import os
 import pygsf
 
 from hyo2.mate.lib.scan import Scan
@@ -43,10 +44,39 @@ class ScanGsf(Scan):
         )
 
     def date_match(self) -> ScanResult:
-        return ScanResult(
-            state=ScanState.WARNING,
-            messages=["Check not implemented for GSF format"]
-        )
+        ''' Obtains the date from the first recorded swath bathy datagram and
+        checks if the date formatted as YYYYMMDD is included in the filename.
+        '''
+        if pygsf.SWATH_BATHYMETRY not in self.datagrams:
+            msg = (
+                "Swath bathymetry datagram (record id {}) not found in file. "
+                "Unable to date information"
+                .format(pygsf.SWATH_BATHYMETRY)
+            )
+            return ScanResult(
+                state=ScanState.WARNING,
+                messages=msg)
+
+        first_swath_datagram = self.datagrams[pygsf.SWATH_BATHYMETRY][0]
+        first_date = first_swath_datagram.currentRecordDateTime()
+        first_date_str = first_date.strftime('%Y%m%d')
+
+        print(first_date_str)
+
+        base_fn = os.path.basename(self.file_path)
+        found = first_date_str in base_fn
+
+        if found:
+            return ScanResult(state=ScanState.PASS)
+        else:
+            msg = (
+                "Could not find record date {} in filename"
+                .format(first_date_str)
+            )
+            return ScanResult(
+                state=ScanState.FAIL,
+                messages=[msg]
+            )
 
     def bathymetry_availability(self) -> ScanResult:
         return ScanResult(
