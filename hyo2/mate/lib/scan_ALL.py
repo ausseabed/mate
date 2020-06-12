@@ -259,8 +259,7 @@ class ScanALL(Scan):
             )
             return ScanResult(
                 state=ScanState.FAIL,
-                messages=[msg],
-                data={'found_filenames': found_filenames}
+                messages=[msg]
             )
 
     def bathymetry_availability(self) -> ScanResult:
