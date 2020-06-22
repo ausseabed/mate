@@ -156,3 +156,9 @@ class ScanGsf(Scan):
             messages=[],
             data=data
         )
+
+    def installation_parameters(self) -> ScanResult:
+        return ScanResult(
+            state=ScanState.WARNING,
+            messages=["Check not implemented for GSF format"]
+        )

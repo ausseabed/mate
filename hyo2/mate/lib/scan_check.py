@@ -377,3 +377,28 @@ class PositionsCheck(ScanCheck):
             data=scan_result.data,
             check_state=scan_result.state
         )
+
+
+class InstallationParametersCheck(ScanCheck):
+    '''
+    Extracts installation parameters, fails if not present
+    '''
+    id = '9e2d78aa-cdc1-4d15-9ac1-6f8e6aa0891d'
+    name = "Installation Parameters"
+    version = '1'
+
+    def __init__(self, scan: Scan, params):
+        ScanCheck.__init__(self, scan, params)
+
+    def run_check(self):
+        scan_result = self.scan.installation_parameters()
+
+        self._output = QajsonOutputs(
+            execution=None,
+            files=None,
+            count=None,
+            percentage=None,
+            messages=scan_result.messages,
+            data=scan_result.data,
+            check_state=scan_result.state
+        )

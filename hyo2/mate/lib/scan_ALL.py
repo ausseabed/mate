@@ -734,3 +734,37 @@ class ScanALL(Scan):
             messages=[],
             data=data
         )
+
+    def installation_parameters(self) -> ScanResult:
+        '''
+        Extracts installation parameters from datagram (of same name).
+        '''
+
+        if 'I' not in self.datagrams:
+            return ScanResult(
+                state=ScanState.FAIL,
+                messages=(
+                    "Installation Parameters datagram (I) not found in file"),
+                data={})
+
+        ips = self.get_installation_parameters()
+        if ips is None:
+            return ScanResult(
+                state=ScanState.FAIL,
+                messages=(
+                    "Failed to find Installation Parameters datagram (I) that "
+                    "contained data"),
+                data={})
+
+        data = {}
+        for ip_param_name, ip_param_value in ips.items():
+            # todo: in future we'll need to perform some translations between
+            # the raw field names and a standardised version across all
+            # file formats
+            data[ip_param_name] = ip_param_value
+
+        return ScanResult(
+            state=ScanState.PASS,
+            messages=[],
+            data=data
+        )

@@ -18,6 +18,7 @@ raw_data_checks = [
     RayTracingCheck,
     RuntimeParametersCheck,
     PositionsCheck,
+    InstallationParametersCheck,
 ]
 
 svp_checks = [
