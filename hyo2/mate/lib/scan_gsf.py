@@ -8,7 +8,12 @@ from hyo2.mate.lib.scan import ScanState, ScanResult
 
 
 class ScanGsf(Scan):
-    '''scan a GSF file and provide some indicators of the contents'''
+    '''
+    A Scan object that contains check information on the contents of a Generic Sensor Format .gsf file
+    
+    :param file_path: The file path to the .gsf file
+    :type file_path: str
+    '''
 
     def __init__(self, file_path):
         Scan.__init__(self, file_path)
@@ -44,8 +49,11 @@ class ScanGsf(Scan):
         )
 
     def date_match(self) -> ScanResult:
-        ''' Obtains the date from the first recorded swath bathy datagram and
+        ''' 
+        Obtains the date from the first recorded swath bathy datagram and
         checks if the date formatted as YYYYMMDD is included in the filename.
+        
+        :return: :class:`hyo2.mate.lib.scan.ScanResult`
         '''
         if pygsf.SWATH_BATHYMETRY not in self.datagrams:
             msg = (
@@ -79,6 +87,11 @@ class ScanGsf(Scan):
             )
 
     def bathymetry_availability(self) -> ScanResult:
+        '''
+        Checks the contents of a Generic Sensor Format .gsf file for all required datagrams when bathymetry processing
+        
+        :return: :class:`hyo2.mate.lib.scan.ScanResult`
+        '''    
         if pygsf.SWATH_BATHYMETRY not in self.datagrams:
             msg = (
                 "Swath bathymetry datagram (record id {}) not found in file."
@@ -124,6 +137,13 @@ class ScanGsf(Scan):
         )
 
     def positions(self) -> ScanResult:
+        '''
+        Extracts positions from SWATH_BATHYMETRY datagram. Scan result includes
+        geojson line definition comprised of these unique positions.
+        
+        :return: :class:`hyo2.mate.lib.scan.ScanResult`
+        '''    
+    
         if pygsf.SWATH_BATHYMETRY not in self.datagrams:
             msg = (
                 "Swath bathymetry datagram (record id {}) not found in file. "

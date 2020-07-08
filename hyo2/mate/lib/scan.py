@@ -13,14 +13,28 @@ A_PASS = 'Pass'
 
 
 class ScanState(str, Enum):
+    '''
+    Enumeration of strings representing check state pass, fail or warning
+        
+    '''
+    
     PASS = "pass"
     FAIL = "fail"
     WARNING = "warning"
 
 
 class ScanResult:
-    '''  results of a scan check. Bundles the state pass/fail with messages
+    '''
+    Results of a scan check. Bundles the state pass, fail or warning with messages
     and any format specific output data
+    
+    :param state: Enumeration of pass, fail or warning
+    :type state: :class:`hyo2.mate.lib.scan.ScanState`
+    :param messages: List of messages or string representation of messages
+    :type messages: List or str, optional
+    :param data: Dictionary of check specific output data
+    :type data: Dict, optional
+    
     '''
     def __init__(
         self,
@@ -96,7 +110,7 @@ class Scan:
         '''
 
     def get_datagram_info(self, datagram_type):
-        '''return info about a specific type of datagrame'''
+        '''return info about a specific type of datagram'''
         if datagram_type in self.scan_result.keys():
             return self.scan_result[datagram_type]
         return None
