@@ -186,6 +186,15 @@ class ScanALL(Scan):
         if rec is not None and 'DSV' in rec.keys():
             dsv = rec['DSV']
         return dsv
+    
+    def get_active_sensors(self):
+        installationParameters = self.get_installation_parameters()
+        activeSensors = {'Position': installationParameters['APS'],
+                         'RollPitch': installationParameters['ARO'],
+                         'Heave': installationParameters['AHE'],
+                         'Heading': installationParameters['AHS'],
+                         'Attvel': installationParameters['VSN']}
+        return activeSensors
 
     def filename_changed(self) -> ScanResult:
         '''
@@ -565,10 +574,11 @@ class ScanALL(Scan):
     def ellipsoid_height_setup(self) -> ScanResult:
         '''
         Decode the raw n - network attitude and velocity input data to try determine positioning system
-        in use
+        in use.  This is done for the active system only
         
         If positioning system is able to be determined decode raw P - position data input to check
-        the correct positioning string is interfaced that contains ellipsoid heights
+        the correct positioning string is interfaced that contains ellipsoid heights.  This is done
+        for the active system only
         
         
         Example is that if a PosMV or F180 is interfaced the raw position string
@@ -588,8 +598,16 @@ class ScanALL(Scan):
                 messages="Unable to conduct height setup check.  No network attitude and velocity datagrams",
                 data={})
 
-        inputtelegramsize = self.datagrams['n'][0].Attitude[0][6]
-        rawposinput = self.datagrams['P'][0].data[2:5].decode("utf-8")
+        activeSensors = self.get_active_sensors()
+        for datagram in self.datagrams['n']:
+            if int(format(datagram.SystemDescriptor, '08b')[2:4],2) == int(activeSensors['Attvel'])+1:
+                inputtelegramsize = datagram.Attitude[0][6]
+                break
+        for datagram in self.datagrams['P']:
+            if int(format(datagram.Descriptor, '08b')[6:],2) == int(activeSensors['Position'])+1:
+                rawposinput = datagram.data[2:5].decode("utf-8")
+                break
+                
         if inputtelegramsize == 137:
             inertialSystem = 'PosMV'
         elif inputtelegramsize == 45 or inputtelegramsize == 43:
