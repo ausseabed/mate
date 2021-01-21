@@ -14,7 +14,12 @@ from hyo2.mate.lib.scan import ScanState, ScanResult
 
 
 class ScanALL(Scan):
-    '''scan an ALL file and provide some indicators of the contents'''
+    '''
+    A Scan object that contains check information on the contents of a Kongsberg .all file
+    
+    :param file_path: The file path to the .all file
+    :type file_path: str
+    '''
 
     def __init__(self, file_path):
         Scan.__init__(self, file_path)
@@ -23,7 +28,7 @@ class ScanALL(Scan):
 
     def get_size_n_pings(self, pings):
         '''
-        return bytes in the file which containg specified
+        return bytes in the file which contain specified
         number of pings
         '''
         c_bytes = 0
@@ -181,11 +186,22 @@ class ScanALL(Scan):
         if rec is not None and 'DSV' in rec.keys():
             dsv = rec['DSV']
         return dsv
+    
+    def get_active_sensors(self):
+        installationParameters = self.get_installation_parameters()
+        activeSensors = {'Position': installationParameters['APS'],
+                         'RollPitch': installationParameters['ARO'],
+                         'Heave': installationParameters['AHE'],
+                         'Heading': installationParameters['AHS'],
+                         'Attvel': installationParameters['VSN']}
+        return activeSensors
 
     def filename_changed(self) -> ScanResult:
         '''
-        check if the filename is different from what recorded
-        in the datagram. Requires `I` datagram
+        Check if the filename is different from what recorded
+        in the datagram. Requires I - Installation Parameters datagram
+        
+        :return: :class:`hyo2.mate.lib.scan.ScanResult`
         '''
         if 'I' not in self.datagrams:
             # then there's no way to check, so fail test
@@ -228,9 +244,10 @@ class ScanALL(Scan):
 
     def date_match(self) -> ScanResult:
         '''
-        compare the date as in the datagram I and the date as written
-        in the filename recorded in the datagram I
-        return: True/False
+        Compare the date as in the I datagram and the date as written
+        in the filename
+        
+        :return: :class:`hyo2.mate.lib.scan.ScanResult`
         '''
         dt = 'unknown'
 
@@ -264,8 +281,9 @@ class ScanALL(Scan):
 
     def bathymetry_availability(self) -> ScanResult:
         '''
-        check the presence of all required datagrams for bathymetry processing
-        return: ScanResult
+        Checks the contents of a Kongsberg .all file for all required datagrams when bathymetry processing
+        
+        :return: :class:`hyo2.mate.lib.scan.ScanResult`
         '''
 
         # define a named tuple for bathy datagrams. Provides a means to define
@@ -336,8 +354,9 @@ class ScanALL(Scan):
 
     def backscatter_availability(self) -> ScanResult:
         '''
-        check the presence of all required datagrams for backscatter processing
-        return: ScanResult
+        Checks the contents of a Kongsberg .all file for all required datagrams when backscatter processing
+        
+        :return: :class:`hyo2.mate.lib.scan.ScanResult`
         '''
 
         # define a named tuple for datagrams. Provides a means to define
@@ -359,8 +378,9 @@ class ScanALL(Scan):
 
     def ray_tracing_availability(self) -> ScanResult:
         '''
-        check the presence of all required datagrams for ray tracing processing
-        return: ScanResult
+        Checks the contents of a Kongsberg .all file for all required datagrams when recalculating ray tracing
+        
+        :return: :class:`hyo2.mate.lib.scan.ScanResult`
         '''
 
         # define a named tuple for datagrams. Provides a means to define
@@ -429,7 +449,8 @@ class ScanALL(Scan):
         scan against the `required_datagrams` list. Critical vs Warning, and
         associated messages are extracted from the attributes of the datagram
         tuples in `required_datagrams`
-        return: a ScanResult
+        
+        :return: :class:`hyo2.mate.lib.scan.ScanResult`
         '''
         # tl;dr this cuts down on amount of code that was duplicated across
         # a number of check functions
@@ -523,7 +544,8 @@ class ScanALL(Scan):
         the water level at the vertical datum (possibly motion corrected).)
         All parsed 'h' datagrams must have the height type of 0 to pass. BUT
         currently only the first 'h' datagram is read (for performance reasons)
-        return: True/False
+        
+        :return: :class:`hyo2.mate.lib.scan.ScanResult`        
         '''
 
         if 'h' not in self.datagrams:
@@ -551,16 +573,23 @@ class ScanALL(Scan):
 
     def ellipsoid_height_setup(self) -> ScanResult:
         '''
-        check the input positioning system string will likely contain heights
-        that are referenced to the ellipsoid and provide feedback that suggests
-        how to rectify if not
-        Logic is that if a PosMV or F180 is interfaced the interfaced string
+        Decode the raw n - network attitude and velocity input data to try determine positioning system
+        in use.  This is done for the active system only
+        
+        If positioning system is able to be determined decode raw P - position data input to check
+        the correct positioning string is interfaced that contains ellipsoid heights.  This is done
+        for the active system only
+        
+        
+        Example is that if a PosMV or F180 is interfaced the raw position string
         needs to be a GGK message
+        
+        
         if a seapath binary message is interfaced then there is no way to determine
-        which system is interfaced and the user will need to check documentation
+        which positioning system is interfaced and the user will need to check documentation
         to ensure the string interfaced for positioning contains ellipsoid heights
 
-        return: ScanResult
+        :return: :class:`hyo2.mate.lib.scan.ScanResult`
         '''
 
         if 'n' not in self.datagrams:
@@ -569,8 +598,16 @@ class ScanALL(Scan):
                 messages="Unable to conduct height setup check.  No network attitude and velocity datagrams",
                 data={})
 
-        inputtelegramsize = self.datagrams['n'][0].Attitude[0][6]
-        rawposinput = self.datagrams['P'][0].data[2:5].decode("utf-8")
+        activeSensors = self.get_active_sensors()
+        for datagram in self.datagrams['n']:
+            if int(format(datagram.SystemDescriptor, '08b')[2:4],2) == int(activeSensors['Attvel'])+1:
+                inputtelegramsize = datagram.Attitude[0][6]
+                break
+        for datagram in self.datagrams['P']:
+            if int(format(datagram.Descriptor, '08b')[6:],2) == int(activeSensors['Position'])+1:
+                rawposinput = datagram.data[2:5].decode("utf-8")
+                break
+                
         if inputtelegramsize == 137:
             inertialSystem = 'PosMV'
         elif inputtelegramsize == 45 or inputtelegramsize == 43:
@@ -642,7 +679,7 @@ class ScanALL(Scan):
 
         :param position: List of position datagrams from where the Latitude
             and Longitude will be extracted
-        :param to_merge_lisr: List of dictionaries that will have the Latitude
+        :param to_merge_list: List of dictionaries that will have the Latitude
             and Longitude added.
         '''
         # to keep this code efficient we assume the position datagrams
@@ -666,7 +703,9 @@ class ScanALL(Scan):
 
     def runtime_parameters(self) -> ScanResult:
         '''
-        Extracts runtime parameters and included them in the `data` dict.
+        Extracts runtime parameters for inclusion in the `data` dict.
+        
+        :return: :class:`hyo2.mate.lib.scan.ScanResult`
         '''
 
         if 'R' not in self.datagrams:
@@ -677,9 +716,12 @@ class ScanALL(Scan):
 
         r_datagrams = self.datagrams['R']
         runtime_parameters = []
+        string = ""
         for r_datagram in r_datagrams:
-            dg_dict = self.__dg_to_dict(r_datagram)
-            runtime_parameters.append(dg_dict)
+            if r_datagram.parameters() != string:
+                dg_dict = self.__dg_to_dict(r_datagram)
+                runtime_parameters.append(dg_dict)
+                string = r_datagram.parameters()
 
         data = {}
 
@@ -704,6 +746,8 @@ class ScanALL(Scan):
         '''
         Extracts positions from position datagram. Scan result includes
         geojson line definition comprised of these unique positions.
+        
+        :return: :class:`hyo2.mate.lib.scan.ScanResult`
         '''
 
         if 'P' not in self.datagrams:

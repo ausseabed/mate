@@ -149,7 +149,7 @@ class TestMateScanALL(unittest.TestCase):
 
         self.assertEqual(
             ellipsoid_height_set.state,
-            scan.ScanState.FAIL
+            scan.ScanState.PASS
         )
 
 
