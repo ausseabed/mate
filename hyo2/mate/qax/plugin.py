@@ -20,6 +20,12 @@ class MateQaxPlugin(QaxCheckToolPlugin):
             icon="kng.png"
         ),
         QaxFileType(
+            name="Kongsberg raw sonar files",
+            extension="kmall",
+            group="Raw Files",
+            icon="kng.png"
+        ),
+        QaxFileType(
             name="Generic Sensor Format files",
             extension="gsf",
             group="Raw Files",
