@@ -16,7 +16,7 @@ from hyo2.mate.lib.scan import ScanState, ScanResult
 class ScanKMALL(Scan):
     '''
     A Scan object that contains check information on the contents of a Kongsberg .all file
-    
+
     :param file_path: The file path to the .all file
     :type file_path: str
     '''
@@ -46,7 +46,7 @@ class ScanKMALL(Scan):
             numBytesDgm, dgmType, dgmVersion, dgm_version, systemID, \
                 dgtime, dgdatetime = self.kmall_reader.datagram_data['header'].values()
             dg_type = dgmType.decode('utf-8').strip('#')
-                
+
             if dg_type not in self.scan_result.keys():
                 self.scan_result[dg_type] = copy(self.default_info)
                 self.scan_result[dg_type]['_seqNo'] = None
@@ -64,7 +64,7 @@ class ScanKMALL(Scan):
             if dgmType == b'#IBE':
                 self._push_datagram(dg_type, self.kmall_reader.datagram_data['BISTText'])
             if dgmType == b'#IBR':
-                self._push_datagram(dg_type, self.kmall_reader.datagram_data['BISTText']) 
+                self._push_datagram(dg_type, self.kmall_reader.datagram_data['BISTText'])
             if dgmType == b'#IBS':
                 self._push_datagram(dg_type, self.kmall_reader.datagram_data['BISTText'])
             if dgmType == b'#MRZ':
@@ -91,7 +91,7 @@ class ScanKMALL(Scan):
                 self._push_datagram(dg_type, self.kmall_reader.datagram_data)
             if dgmType == b'#FCF':
                 self._push_datagram(dg_type, self.kmall_reader.datagram_data)
-            
+
         filename, totalpings, NpingsMissed, MissingMRZCount = self.kmall_reader.check_ping_count()
         self.scan_result['MRZ']['missedPings'] = NpingsMissed
         self.scan_result['MRZ']['pingCount'] = totalpings
@@ -116,7 +116,34 @@ class ScanKMALL(Scan):
             return installationParametersDatagram['install_txt']
 
         return None
-    
+
+    def installation_parameters(self) -> ScanResult:
+        '''
+        Gets the installation parameters in a ScanResult format
+        '''
+
+        ip = self.get_installation_parameters()
+
+        if ip is None:
+            return ScanResult(
+                state=ScanState.FAIL,
+                messages=(
+                    "Installation Parameters datagram not found in file"),
+                data={})
+
+        data = {}
+        for ip_param_name, ip_param_value in ip.items():
+            # todo: in future we'll need to perform some translations between
+            # the raw field names and a standardised version across all
+            # file formats
+            data[ip_param_name] = ip_param_value
+
+        return ScanResult(
+            state=ScanState.PASS,
+            messages=[],
+            data=data
+        )
+
     def get_active_sensors(self):
         installationParameters = self.get_installation_parameters()
         active = []
@@ -137,7 +164,7 @@ class ScanKMALL(Scan):
         '''
         Check if the filename is different from what recorded
         in the datagram. Requires I - Installation Parameters datagram
-        
+
         :return: :class:`hyo2.mate.lib.scan.ScanResult`
         '''
         return ScanResult(
@@ -149,7 +176,7 @@ class ScanKMALL(Scan):
         '''
         Compare the date as in the IIP datagram and the date as written
         in the filename
-        
+
         :return: :class:`hyo2.mate.lib.scan.ScanResult`
         '''
 
@@ -184,7 +211,7 @@ class ScanKMALL(Scan):
     def bathymetry_availability(self) -> ScanResult:
         '''
         Checks the contents of a Kongsberg .kmall file for all required datagrams when bathymetry processing
-        
+
         :return: :class:`hyo2.mate.lib.scan.ScanResult`
         '''
 
@@ -245,7 +272,7 @@ class ScanKMALL(Scan):
     def backscatter_availability(self) -> ScanResult:
         '''
         Checks the contents of a Kongsberg .kmall file for all required datagrams when backscatter processing
-        
+
         :return: :class:`hyo2.mate.lib.scan.ScanResult`
         '''
 
@@ -269,7 +296,7 @@ class ScanKMALL(Scan):
     def ray_tracing_availability(self) -> ScanResult:
         '''
         Checks the contents of a Kongsberg .kmall file for all required datagrams when recalculating ray tracing
-        
+
         :return: :class:`hyo2.mate.lib.scan.ScanResult`
         '''
 
@@ -333,7 +360,7 @@ class ScanKMALL(Scan):
         scan against the `required_datagrams` list. Critical vs Warning, and
         associated messages are extracted from the attributes of the datagram
         tuples in `required_datagrams`
-        
+
         :return: :class:`hyo2.mate.lib.scan.ScanResult`
         '''
         # tl;dr this cuts down on amount of code that was duplicated across
@@ -428,8 +455,8 @@ class ScanKMALL(Scan):
         the water level at the vertical datum (possibly motion corrected).)
         All parsed 'h' datagrams must have the height type of 0 to pass. BUT
         currently only the first 'h' datagram is read (for performance reasons)
-        
-        :return: :class:`hyo2.mate.lib.scan.ScanResult`        
+
+        :return: :class:`hyo2.mate.lib.scan.ScanResult`
         '''
 
         if 'SHI' not in self.datagrams:
@@ -459,16 +486,16 @@ class ScanKMALL(Scan):
         '''
         Decode the raw n - network attitude and velocity input data to try determine positioning system
         in use.  This is done for the active system only
-        
+
         If positioning system is able to be determined decode raw P - position data input to check
         the correct positioning string is interfaced that contains ellipsoid heights.  This is done
         for the active system only
-        
-        
+
+
         Example is that if a PosMV or F180 is interfaced the raw position string
         needs to be a GGK message
-        
-        
+
+
         if a seapath binary message is interfaced then there is no way to determine
         which positioning system is interfaced and the user will need to check documentation
         to ensure the string interfaced for positioning contains ellipsoid heights
@@ -485,7 +512,7 @@ class ScanKMALL(Scan):
         activeSensors = self.get_active_sensors()
         motionSensorFmt = self.get_installation_parameters()[activeSensors['Attvel'] + '_data_format']
         rawposinput = self.get_installation_parameters()[activeSensors['Position'] + '_data_format']
-                
+
         if motionSensorFmt == 'POS MV GRP 102/103':
             inertialSystem = 'PosMV'
         else:
@@ -580,7 +607,7 @@ class ScanKMALL(Scan):
     def runtime_parameters(self) -> ScanResult:
         '''
         Extracts runtime parameters for inclusion in the `data` dict.
-        
+
         :return: :class:`hyo2.mate.lib.scan.ScanResult`
         '''
 
@@ -621,7 +648,7 @@ class ScanKMALL(Scan):
         '''
         Extracts positions from position datagram. Scan result includes
         geojson line definition comprised of these unique positions.
-        
+
         :return: :class:`hyo2.mate.lib.scan.ScanResult`
         '''
 
