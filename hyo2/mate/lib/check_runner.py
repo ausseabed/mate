@@ -3,10 +3,10 @@ from datetime import datetime
 import logging
 import os
 import traceback
-from typing import Callable
+from typing import Callable, List
 
 from ausseabed.qajson.model import QajsonParam, QajsonOutputs, \
-    QajsonExecution, QajsonInputs
+    QajsonExecution, QajsonInputs, QajsonCheck, QajsonExecution
 
 from hyo2.mate.lib.utils import get_scan, get_check, is_check_supported
 
@@ -24,7 +24,7 @@ class CheckRunner:
     to the next file.
     """
 
-    def __init__(self, checks_def: list):
+    def __init__(self, checks_def: List[QajsonCheck]):
         """ `CheckRunner` constructor
 
         Args:
@@ -32,13 +32,9 @@ class CheckRunner:
                 the checks block of the QA JSON schema.
         """
         self._input = checks_def
-        # The check runner output will based on its input but add new content
-        # based on check execution and results. Clone the input to use as the
-        # basis of the output.
-        self._output = copy.deepcopy(self._input)
+        # The check runner output will be added to the input qajson
+        self._output = self._input
         self._file_checks = None
-
-        self.stopped = False  # if true check runner should stop execution
 
     @property
     def output(self) -> dict:
@@ -57,8 +53,8 @@ class CheckRunner:
         """
         filechecks = {}
         for check in self._input:
-            checkid = check['info']['id']
-            checkversion = check['info']['version']
+            checkid = check.info.id
+            checkversion = check.info.version
             if not is_check_supported(checkid, checkversion):
                 # It's expected the QA JSON definition could include other
                 # checks not supported by this application. Ignore these
@@ -67,10 +63,10 @@ class CheckRunner:
                     "Check {} was ignored as it is not supported"
                     .format(check['info']['id']))
                 continue
-            inputs = check['inputs']
-            for input in inputs['files']:
-                filename = input['path']
-                filetype = input['file_type']
+            inputs = check.inputs
+            for input in inputs.files:
+                filename = input.path
+                filetype = input.file_type
 
                 if (filename, filetype) in filechecks:
                     checklistforfile = filechecks[(filename, filetype)]
@@ -86,7 +82,7 @@ class CheckRunner:
         """ Adds the output to the appropriate location in the _output.
         """
         for check in self._output:
-            outputcheckid = check['info']['id']
+            outputcheckid = check.info.id
 
             # does this check match the check fro which the output was
             # generated for
@@ -97,39 +93,39 @@ class CheckRunner:
             # generated for. There may be duplicate checks, each with different
             # files, this makes sure we only attach the output to the right
             # one.
-            inputs = check['inputs']
+            inputs = check.inputs
             has_file = False
-            for input in inputs['files']:
-                if input['path'] == filename:
+            for input in inputs.files:
+                if input.path == filename:
                     has_file = True
                     break
 
             if not has_file:
                 continue
 
-            check['outputs'] = output.to_dict()
+            check.outputs = output
             return
 
         raise RuntimeError("Could not find check {} for file {}".format(
             check_id, filename
         ))
 
-    def stop(self):
-        """ Stop execution of the check runner. Currently this will only stop
-        execution are a file has been fully read. There may be a delay between
-        calling this and execution being stopped.
-        """
-        self.stopped = True
-
-    def run_checks(self, progress_callback: Callable = None):
+    def run_checks(
+            self,
+            progress_callback: Callable = None,
+            qajson_update_callback: Callable = None,
+            is_stopped: Callable = None):
         """ Excutes all checks on a file-by-file basis
 
         :param progress_callback Callable: function reference that is passed
             a float between the value of 0.0 and 1.0 to indicate progress
             of the checks. Optional.
+        :param qajson_update_callback Callable: function reference that is
+            to be called when the qajson related to this check has been
+            updated by the check. Optional.
+        :param is_stopped Callable: if this function returns True the check
+            runner will stop processing (eventually)
         """
-        self.stopped = False
-
         if self._file_checks is None:
             raise RuntimeError("CheckRunner is not initialized")
 
@@ -141,7 +137,7 @@ class CheckRunner:
                 total_file_size += os.path.getsize(filename)
 
         for (filename, filetype), checklist in self._file_checks.items():
-            if self.stopped:
+            if is_stopped is not None and is_stopped():
                 return
 
             file_size = 0
@@ -167,13 +163,12 @@ class CheckRunner:
             processed_files_size += file_size
 
             for checkdata in checklist:
-                checkid = checkdata['info']['id']
-                checkversion = checkdata['info']['version']
+                checkid = checkdata.info.id
+                checkversion = checkdata.info.version
 
                 checkparams = []
-                if 'params' in checkdata['inputs']:
-                    checkparams = (
-                        QajsonInputs.from_dict(checkdata['inputs']).params)
+                if checkdata.inputs.params is not None:
+                    checkparams = checkdata.inputs.params
 
                 checkoutputs = QajsonOutputs()
                 checkstatus = None
@@ -191,13 +186,17 @@ class CheckRunner:
                     checkerrormessage = traceback.format_exc()
                 checkend = datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f")
 
-                execution = {}
-                execution['start'] = checkstart
-                execution['end'] = checkend
-                execution['status'] = checkstatus
-                if checkerrormessage is not None:
-                    execution['error'] = checkerrormessage
-
-                checkoutputs.execution = QajsonExecution.from_dict(execution)
+                checkoutputs.execution = QajsonExecution(
+                    start=checkstart,
+                    end=checkend,
+                    status=checkstatus,
+                    error=checkerrormessage
+                )
 
                 self._add_output(checkid, filename, checkoutputs)
+
+            # qajson for all checks is updated on a file by file basis. So
+            # call the update after a file has finished processing, and
+            # not after each check.
+            if qajson_update_callback is not None:
+                qajson_update_callback()

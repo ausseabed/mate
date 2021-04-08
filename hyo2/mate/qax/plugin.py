@@ -1,3 +1,4 @@
+from timeit import default_timer as timer
 from typing import List, Dict, NoReturn, Callable
 from pathlib import Path
 
@@ -52,7 +53,6 @@ class MateQaxPlugin(QaxCheckToolPlugin):
         # name of the check tool
         self.name = 'Mate'
         self._check_references = self._build_check_references()
-        self.stopped = False
         self.check_runner = None
 
     def _build_check_references(self) -> List[QaxCheckReference]:
@@ -111,13 +111,16 @@ class MateQaxPlugin(QaxCheckToolPlugin):
     def run(
             self,
             qajson: QajsonRoot,
-            progress_callback: Callable = None
-            ) -> NoReturn:
-        self.stopped = False
+            progress_callback: Callable = None,
+            qajson_update_callback: Callable = None,
+            is_stopped: Callable = None
+    ) -> NoReturn:
 
         # Mate still works with QA JSON dicts, so use the qajson objects
         # to_dict function to generate it.
-        rawdatachecks = qajson.qa.raw_data.to_dict()['checks']
+        rawdatachecks = qajson.qa.raw_data.checks
+
+        start = timer()
 
         self.check_runner = CheckRunner(rawdatachecks)
         self.check_runner.initialize()
@@ -128,47 +131,52 @@ class MateQaxPlugin(QaxCheckToolPlugin):
         def pg_call(check_runner_progress):
             progress_callback(self, check_runner_progress)
 
-        self.check_runner.run_checks(pg_call)
+        def qajson_update_call():
+            if qajson_update_callback is not None:
+                qajson_update_callback()
 
-        # the checks runner produces an array containing a listof checks
-        # each check being a dictionary. Deserialise these using the qa json
-        # datalevel class
-        out_dl = QajsonDataLevel.from_dict(
-            {'checks': self.check_runner.output})
+        self.check_runner.run_checks(
+            progress_callback=pg_call,
+            qajson_update_callback=qajson_update_call,
+            is_stopped=is_stopped
+        )
 
-        # now loop through all raw_data (Mate only does raw data) checks in
-        # the qsjson and update the right checks with the check runner output
-        for out_check in out_dl.checks:
-            # find the check definition in the input qajson.
-            # note: both check and id must match. The same check implmenetation
-            # may be include twice but with diffferent names (this is
-            # supported)
-            in_check = next(
-                (
-                    c
-                    for c in qajson.qa.raw_data.checks
-                    if (
-                        c.info.id == out_check.info.id and
-                        c.info.name == out_check.info.name and
-                        self.__check_files_match(c.inputs, out_check.inputs))
-                ),
-                None
-            )
-            if in_check is None:
-                # this would indicate a check was run that was not included
-                # in the input qajson. *Should never occur*
-                raise RuntimeError(
-                    "Check {} ({}) found in output that was not "
-                    "present in input"
-                    .format(out_check.info.name, out_check.info.id))
-            # replace the input qajson check outputs with the output generated
-            # by the check_runner
-            in_check.outputs = out_check.outputs
+        end = timer()
 
-    def stop(self):
-        self.stopped = True
-        if self.check_runner is not None:
-            self.check_runner.stop()
+        # # the checks runner produces an array containing a listof checks
+        # # each check being a dictionary. Deserialise these using the qa json
+        # # datalevel class
+        # out_dl = QajsonDataLevel.from_dict(
+        #     {'checks': self.check_runner.output})
+
+        # # now loop through all raw_data (Mate only does raw data) checks in
+        # # the qsjson and update the right checks with the check runner output
+        # for out_check in out_dl.checks:
+        #     # find the check definition in the input qajson.
+        #     # note: both check and id must match. The same check implmenetation
+        #     # may be include twice but with diffferent names (this is
+        #     # supported)
+        #     in_check = next(
+        #         (
+        #             c
+        #             for c in qajson.qa.raw_data.checks
+        #             if (
+        #                 c.info.id == out_check.info.id and
+        #                 c.info.name == out_check.info.name and
+        #                 self.__check_files_match(c.inputs, out_check.inputs))
+        #         ),
+        #         None
+        #     )
+        #     if in_check is None:
+        #         # this would indicate a check was run that was not included
+        #         # in the input qajson. *Should never occur*
+        #         raise RuntimeError(
+        #             "Check {} ({}) found in output that was not "
+        #             "present in input"
+        #             .format(out_check.info.name, out_check.info.id))
+        #     # replace the input qajson check outputs with the output generated
+        #     # by the check_runner
+        #     in_check.outputs = out_check.outputs
 
     def update_qa_json_input_files(
             self, qa_json: QajsonRoot, files: List[Path]) -> NoReturn:
