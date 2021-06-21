@@ -16,9 +16,9 @@ from hyo2.mate.lib.scan import ScanState, ScanResult
 class ScanALL(Scan):
     '''
     A Scan object that contains check information on the contents of a Kongsberg .all file
+      :param file_path: The file path to the .all file
+      :type file_path: str
     
-    :param file_path: The file path to the .all file
-    :type file_path: str
     '''
 
     def __init__(self, file_path):
@@ -461,6 +461,7 @@ class ScanALL(Scan):
         all_noncritical = True
         missing_critical = []
         missing_noncritical = []
+        present = []
         messages = []
 
         for required_datagram in required_datagrams:
@@ -482,11 +483,14 @@ class ScanALL(Scan):
                 all_noncritical = False
                 missing_noncritical.append(required_datagram.id)
                 messages.append(required_datagram.error_message)
+            else:
+                present.append(required_datagram.id)
 
         # include a lists of missing datagrams in result object
         data = {
             'missing_critical': missing_critical,
-            'missing_noncritical': missing_noncritical
+            'missing_noncritical': missing_noncritical,
+            'present': present
         }
 
         if not all_critical:
@@ -504,7 +508,8 @@ class ScanALL(Scan):
         else:
             return ScanResult(
                 state=ScanState.PASS,
-                messages=messages
+                messages=messages,
+                data=data
             )
 
     def is_missing_pings_tolerable(self, thresh=1.0):

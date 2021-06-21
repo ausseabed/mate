@@ -8,7 +8,7 @@ from hyo2.mate.lib import scan
 TEST_FILE = "0051_20190927_172942_Investigator_em710.gsf"
 
 
-class TestMateScanALL(unittest.TestCase):
+class TestMateScanGsf(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):

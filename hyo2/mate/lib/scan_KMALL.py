@@ -42,10 +42,23 @@ class ScanKMALL(Scan):
 
             # read datagram information
             self.kmall_reader.decode_datagram()
-            self.kmall_reader.read_datagram()
-            numBytesDgm, dgmType, dgmVersion, dgm_version, systemID, \
-                dgtime, dgdatetime = self.kmall_reader.datagram_data['header'].values()
-            dg_type = dgmType.decode('utf-8').strip('#')
+            dg_type = self.kmall_reader.datagram_ident
+            # Large amounts of data in MRZ packets in only reading
+            # header, common and ping data as full data not required
+            if dg_type == 'MRZ':
+                dg = {}
+                start = self.kmall_reader.FID.tell()
+                dg['header'] = self.kmall_reader.read_EMdgmHeader()
+                dg['partition'] = self.kmall_reader.read_EMdgmMpartition()
+                dg['cmnPart'] = self.kmall_reader.read_EMdgmMbody()
+                dg['pingInfo'] = self.kmall_reader.read_EMdgmMRZ_pingInfo()
+                numBytesDgm, dgmType, dgmVersion, dgm_version, systemID, \
+                    dgtime, dgdatetime = dg['header'].values()
+                self.kmall_reader.FID.seek(start + numBytesDgm, 0)
+            else:
+                self.kmall_reader.read_datagram()
+                numBytesDgm, dgmType, dgmVersion, dgm_version, systemID, \
+                    dgtime, dgdatetime = self.kmall_reader.datagram_data['header'].values()
 
             if dg_type not in self.scan_result.keys():
                 self.scan_result[dg_type] = copy(self.default_info)
@@ -68,7 +81,7 @@ class ScanKMALL(Scan):
             if dgmType == b'#IBS':
                 self._push_datagram(dg_type, self.kmall_reader.datagram_data['BISTText'])
             if dgmType == b'#MRZ':
-                self._push_datagram(dg_type, self.kmall_reader.datagram_data)
+                self._push_datagram(dg_type, dg)
             if dgmType == b'#MWC':
                 self._push_datagram(dg_type, self.kmall_reader.datagram_data)
             if dgmType == b'#SPO':
@@ -169,7 +182,7 @@ class ScanKMALL(Scan):
         '''
         return ScanResult(
             state=ScanState.WARNING,
-            messages=["Check not implemented for GSF format"]
+            messages=["Check not implemented for KMALL format"]
         )
 
     def date_match(self) -> ScanResult:
@@ -185,7 +198,7 @@ class ScanKMALL(Scan):
             return ScanResult(
                 state=ScanState.FAIL,
                 messages=[
-                    "'I' datagram not found, cannot extract startTime"]
+                    "'IIP' datagram not found, cannot extract startTime"]
             )
 
         base_fn = os.path.basename(self.file_path)
@@ -372,6 +385,7 @@ class ScanKMALL(Scan):
         all_noncritical = True
         missing_critical = []
         missing_noncritical = []
+        present = []
         messages = []
 
         for required_datagram in required_datagrams:
@@ -393,11 +407,14 @@ class ScanKMALL(Scan):
                 all_noncritical = False
                 missing_noncritical.append(required_datagram.id)
                 messages.append(required_datagram.error_message)
+            else:
+                present.append(required_datagram.id)
 
         # include a lists of missing datagrams in result object
         data = {
             'missing_critical': missing_critical,
-            'missing_noncritical': missing_noncritical
+            'missing_noncritical': missing_noncritical,
+            'present': present
         }
 
         if not all_critical:
@@ -415,7 +432,8 @@ class ScanKMALL(Scan):
         else:
             return ScanResult(
                 state=ScanState.PASS,
-                messages=messages
+                messages=messages,
+                data=data
             )
 
     def is_missing_pings_tolerable(self, thresh=1.0):
@@ -436,8 +454,8 @@ class ScanKMALL(Scan):
 
     def has_minimum_pings(self, thresh=10):
         '''
-        check if we have minimum number of requied pings in all multibeam
-        data datagrams (D or X, F or f or N, S or Y)
+        check if we have minimum number of required pings in all multibeam
+        data datagrams (MRZ)
         (minimum number is 10)
         return: True/False
         '''
@@ -484,10 +502,10 @@ class ScanKMALL(Scan):
 
     def ellipsoid_height_setup(self) -> ScanResult:
         '''
-        Decode the raw n - network attitude and velocity input data to try determine positioning system
+        Decode the raw IIP - Installation Parameters input data to try determine positioning system
         in use.  This is done for the active system only
 
-        If positioning system is able to be determined decode raw P - position data input to check
+        If positioning system is able to be determined decode raw data strings in the IIP data input to check
         the correct positioning string is interfaced that contains ellipsoid heights.  This is done
         for the active system only
 
