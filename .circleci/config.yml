@@ -22,7 +22,7 @@ jobs:
     working_directory: ~/build
     docker:
       - image: circleci/python:3.6.4
-    resource_class: "medium+"
+    resource_class: "large"
     steps:
       - attach_workspace:
           at: ~/tests/test_data_remote
