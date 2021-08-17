@@ -72,7 +72,7 @@ setup(
         read("HISTORY.rst") + "\n\n\"\"\"\"\"\"\"\n\n" +
         read("AUTHORS.rst") + "\n\n\"\"\"\"\"\"\"\n\n" +
         read(os.path.join("docs", "developer_guide_how_to_contribute.rst"))),
-    url="https://github.com/hydroffice/hyo2_mate",
+    url="https://github.com/ausseabed/mate",
     classifiers=[  #
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Science/Research',
