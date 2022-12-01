@@ -7,7 +7,7 @@ from typing import List, Dict
 import functools
 import os
 import struct
-from KMALL import kmall
+from KMALL.kmall import kmall
 
 from hyo2.mate.lib.scan import Scan, A_NONE, A_PARTIAL, A_FULL, A_FAIL, A_PASS
 from hyo2.mate.lib.scan import ScanState, ScanResult
