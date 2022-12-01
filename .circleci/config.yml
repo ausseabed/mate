@@ -21,7 +21,7 @@ jobs:
   build:
     working_directory: ~/build
     docker:
-      - image: circleci/python:3.6.4
+      - image: circleci/python:3.10
     resource_class: "large"
     steps:
       - attach_workspace:
