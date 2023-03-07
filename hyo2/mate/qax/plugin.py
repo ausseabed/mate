@@ -99,6 +99,16 @@ class MateQaxPlugin(QaxCheckToolPlugin):
     def checks(self) -> List[QaxCheckReference]:
         return self._check_references
 
+    def get_summary_value(
+            self,
+            field_section: str,
+            field_name: str,
+            file_name: str,
+            qajson: QajsonRoot
+        ) -> object:
+        print("Summary data from MATE not implemented")
+        return None
+
     def __check_files_match(self, a: QajsonInputs, b: QajsonInputs) -> bool:
         """ Checks if the input files in a are the same as b. This is used
         to match the plugin's output with the QAJSON outputs that must be
