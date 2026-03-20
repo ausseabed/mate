@@ -64,3 +64,5 @@ _build/
 *.ipynb_checkpoints
 
 other_data/
+tests/test_data_remote/*.all
+tests/test_data_remote/*.gsf
