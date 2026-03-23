@@ -1,10 +1,6 @@
 Mate
 ====
 
-.. image:: https://circleci.com/gh/ausseabed/mate.svg?style=svg
-    :target: https://circleci.com/gh/ausseabed/mate
-    :alt: CircleCI Status
-
 * Code: `GitHub repo <https://github.com/ausseabed/mate>`_
 * License: Apache 2.0
 
