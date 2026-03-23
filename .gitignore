@@ -66,3 +66,13 @@ _build/
 other_data/
 tests/test_data_remote/*.all
 tests/test_data_remote/*.gsf
+
+# pixi environments
+.pixi/*
+!.pixi/config.toml
+pixi.lock
+
+OLD/*
+vendor/output/*
+*.conda
+.vscode/*

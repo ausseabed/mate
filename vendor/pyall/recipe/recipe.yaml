@@ -1,0 +1,31 @@
+package:
+  name: pyall
+  version: 1.0.0
+
+source:
+  - path: ../src
+
+build:
+  noarch: python
+  script:
+    - python -m pip install . --no-deps -vv
+
+requirements:
+  host:
+    - python >=3.10
+    - pip
+    - setuptools
+    - wheel
+  run:
+    - python >=3.10
+
+tests:
+  - python:
+      imports:
+      - pyall
+
+about:
+  summary: "Reader for Kronsberg .ALL files"
+  license: Apache-2.0 
+  homepage: https://github.com/ausseabed/pyall
+  repository: https://github.com/ausseabed/pyall
