@@ -336,7 +336,7 @@ class TestMateScanGsf(unittest.TestCase):
         self.test.datagrams[4][0].installationParameters = data
         inst_params = self.test.get_installation_parameters()
         self.assertIsInstance(inst_params, dict)
-        self.assertEquals(inst_params, data)
+        self.assertEqual(inst_params, data)
 
     def test_runtime_parameters(self):
         rt_params = self.test.runtime_parameters()
