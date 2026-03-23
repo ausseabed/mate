@@ -1,0 +1,9 @@
+[submodule "vendor/pyall/src"]
+	path = vendor/pyall/src
+	url = https://github.com/ausseabed/pyall.git
+[submodule "vendor/kmall/src"]
+	path = vendor/kmall/src
+	url = https://github.com/ausseabed/kmall.git
+[submodule "vendor/pygsf/src"]
+	path = vendor/pygsf/src
+	url = https://github.com/ausseabed/pygsf.git

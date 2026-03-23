@@ -1,0 +1,34 @@
+package:
+  name: kmall
+  version: 1.0.0
+
+source:
+  - path: ../src
+
+build:
+  noarch: python
+  script:
+    - python -m pip install . --no-deps -vv
+
+requirements:
+  host:
+    - python >=3.10
+    - pip
+    - setuptools
+    - wheel
+  run:
+    - python >=3.10
+    - pandas
+    - pyproj
+    - scipy
+
+tests:
+  - python:
+      imports:
+      - KMALL.kmall
+
+about:
+  summary: "Reader for Kongsberg KMALL multibeam sonar data files."
+  license: CC0-1.0
+  homepage: https://github.com/ausseabed/kmall
+  repository: https://github.com/ausseabed/kmall

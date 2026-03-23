@@ -1,0 +1,31 @@
+package:
+  name: pygsf
+  version: 1.0.0
+
+source:
+  - path: ../src
+
+build:
+  noarch: python
+  script:
+    - python -m pip install . --no-deps -vv
+
+requirements:
+  host:
+    - python >=3.10
+    - pip
+    - setuptools
+    - wheel
+  run:
+    - python >=3.10
+
+tests:
+  - python:
+      imports:
+      - pygsf
+
+about:
+  summary: "Reader for generic sensor format files (.gsf)"
+  license: Apache-2.0 
+  homepage: https://github.com/ausseabed/pygsf
+  repository: https://github.com/ausseabed/pygsf
