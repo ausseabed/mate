@@ -1,0 +1,62 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "hyo2.mate"
+version = "0.1.0"
+description = "The Multibeam Acquisition and Tracking Evaluator app and library."
+readme = { file = "README.rst", content-type = "text/x-rst" }
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+
+authors = [
+  { name = "Wenjun Wu (Geoscience Australia)", email = "wenjun.wu@ga.gov.au" },
+  { name = "Justy Siwabessy (Geoscience Australia)", email = "justy.siwabessy@ga.gov.au" },
+  { name = "Lachlan Hurst (FrontiersSI)", email = "lhurst@frontiersi.com.au" },
+  { name = "Giuseppe Masetti (UNH, CCOM)", email = "gmasetti@ccom.unh.edu" },
+]
+
+keywords = ["hydrography", "ocean mapping", "survey", "raw data"]
+
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Science/Research",
+  "Natural Language :: English",
+  "License :: OSI Approved :: Apache Software License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Topic :: Scientific/Engineering :: GIS",
+  "Topic :: Office/Business :: Office Suites",
+]
+
+dependencies = [
+  "ausseabed.qajson",
+  "geojson",
+  "kmall",
+  "pyall",
+  "pygsf",
+]
+
+[project.scripts]
+"hyo2.mate" = "hyo2.mate.app.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/ausseabed/mate"
+
+[tool.hatch.build]
+license-files = ["LICENSE"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["hyo2"]
+
+# Ensure non-Python package data is included in the wheel
+include = [
+  "hyo2/mate/media/**",
+]
