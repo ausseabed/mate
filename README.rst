@@ -7,22 +7,27 @@ Mate
 Installation
 ------------
 
-**Note:** Mate requires Python v3.6+, the following commands are written assuming
-:bash:`pip` has been setup as an alias to a Python 3 based installation. If this is not the case please use :bash:`pip3` in place of :bash:`pip` below.
+Conda users can install Mate from the `prefix.dev/kk-test
+<https://prefix.dev/channels/kk-test/packages/hyo2-mate>`_ channel using the
+following command::
 
-Clone source code::
+    conda install -c https://prefix.dev/kk-test hyo2-mate
+
+
+This project uses `Pixi <https://pixi.prefix.dev/>`_ to manage dependencies and build
+the application. The following instructions assume that Pixi is installed and
+available on the command line. Clone source code::
 
     git clone https://github.com/ausseabed/mate.git
     cd mate
 
-Install dependencies::
+Install dependencies and build the application::
 
-    pip install -r requirements.txt
+    pixi install
 
-Install application::
+To activate conda environment::
 
-    pip install -e .
-
+    pixi shell
 
 Command Line Application
 ------------------------
