@@ -35,3 +35,5 @@ pip = "*"
 mypy = ">=1.19.1,<2"
 types-jsonschema = ">=4.26.0.20260202,<5"
 
+[tasks]
+pytest = "python -m pytest --cov=hyo2.mate --cov-report=term --cov-report=html tests"
